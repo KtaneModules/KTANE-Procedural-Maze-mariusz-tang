@@ -8,7 +8,7 @@ public class ProceduralMazeModule : MonoBehaviour {
 
     private void Start() {
         _mazeRenderer = GetComponentInChildren<MazeRenderer>();
-        _mazeRenderer.RenderCells(1, 1, 5, 3);
+        _mazeRenderer.RenderCellsAndGenerateRings(1, 1, 5, 3);
     }
 
 }
