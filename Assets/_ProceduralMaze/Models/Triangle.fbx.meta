@@ -4,11 +4,38 @@ ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
     100000: //RootNode
+    100002: Button
+    100004: Component_PuzzleBackground
+    100006: Plane
+    100008: Ring
+    100010: Screen
     400000: //RootNode
+    400002: Button
+    400004: Component_PuzzleBackground
+    400006: Plane
+    400008: Ring
+    400010: Screen
     2100000: No Name
+    2100002: Component_PuzzleBack_mat
+    2100004: Material.001
+    2100006: Material.002
     2300000: //RootNode
+    2300002: Button
+    2300004: Component_PuzzleBackground
+    2300006: Plane
+    2300008: Ring
+    2300010: Screen
     3300000: //RootNode
+    3300002: Button
+    3300004: Component_PuzzleBackground
+    3300006: Plane
+    3300008: Ring
+    3300010: Screen
     4300000: Plane
+    4300002: Component_PuzzleBackground
+    4300004: Screen
+    4300006: Button
+    4300008: Ring
   externalObjects: {}
   materials:
     importMaterials: 1
