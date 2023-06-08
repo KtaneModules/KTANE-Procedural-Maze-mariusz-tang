@@ -24,6 +24,8 @@ public class MazeRenderer : MonoBehaviour {
     private MeshRenderer[,] _columnWallRenderers = new MeshRenderer[6, 5];
     private MeshRenderer[,] _rowWallRenderers = new MeshRenderer[6, 5];
 
+    private BitMaze6x6 _maze;
+
     private void Start() {
         _cellOffColour = _cell.GetComponent<MeshRenderer>().sharedMaterial.color;
         GenerateWalls();
@@ -50,16 +52,21 @@ public class MazeRenderer : MonoBehaviour {
         }
     }
 
-    public void RenderCellsAndGenerateRings(int startX, int startY, int endX, int endY) {
+        public void AssignMaze(BitMaze6x6 maze) {
+        _maze = maze;
+        RenderCellsAndGenerateRings(maze.StartPosition, maze.GoalPosition);
+    }
+
+    private void RenderCellsAndGenerateRings(Vector2Int start, Vector2Int goal) {
         for (int i = 0; i < 6; i++) {
             for (int j = 0; j < 6; j++) {
                 Vector3 position = new Vector3(_cellXyOrigin + i * _cellXyOffset, _cellXyOrigin + j * _cellXyOffset, _mazeZPosition);
 
-                GameObject mazeObjectPrefab = (i == endX && j == endY) ? _triangle : _cell;
+                GameObject mazeObjectPrefab = (i == goal.x && j == goal.y) ? _triangle : _cell;
                 GameObject mazeObject = Instantiate(mazeObjectPrefab, _grid.transform);
                 mazeObject.transform.localPosition = position;
                 _cellRenderers[i, j] = mazeObject.GetComponent<MeshRenderer>();
-                if (i == startX && j == startY) {
+                if (i == start.x && j == start.y) {
                     _cellRenderers[i, j].material.color = Color.white;
                 }
 
@@ -70,4 +77,11 @@ public class MazeRenderer : MonoBehaviour {
         }
     }
 
+    public void RenderRings() {
+        for (int col = 0; col < 6; col++) {
+            for (int row = 0; row < 6; row++) {
+                _ringRenderers[col, row].enabled = _maze.Bitmap[col, row] == 1;
+            }
+        }
+    }
 }

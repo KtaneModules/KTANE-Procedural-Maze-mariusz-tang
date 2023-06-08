@@ -1,4 +1,4 @@
-﻿public enum Directions {
+﻿public enum MazeDirection {
     Up = 0,
     Right = 1,
     Down = 2,
