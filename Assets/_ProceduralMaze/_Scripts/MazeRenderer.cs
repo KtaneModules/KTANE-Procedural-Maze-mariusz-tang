@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,10 +16,13 @@ public class MazeRenderer : MonoBehaviour {
     [SerializeField] private GameObject _grid;
 
     private Color _cellOffColour;
+
+    // Stored as [column, row].
     private MeshRenderer[,] _cellRenderers = new MeshRenderer[6, 6];
     private MeshRenderer[,] _ringRenderers = new MeshRenderer[6, 6];
-    private MeshRenderer[,] _horizontalWallRenderers = new MeshRenderer[5, 6];
-    private MeshRenderer[,] _verticalWallRenderers = new MeshRenderer[5, 6];
+    // These are the walls in each row and column. Stored as [column/row, wall].
+    private MeshRenderer[,] _columnWallRenderers = new MeshRenderer[6, 5];
+    private MeshRenderer[,] _rowWallRenderers = new MeshRenderer[6, 5];
 
     private void Start() {
         _cellOffColour = _cell.GetComponent<MeshRenderer>().sharedMaterial.color;
@@ -26,22 +30,22 @@ public class MazeRenderer : MonoBehaviour {
     }
 
     private void GenerateWalls() {
-        var horizRotation = Quaternion.FromToRotation(Vector3.up, Vector3.right);
-        var vertiRotation = Quaternion.FromToRotation(Vector3.up, Vector3.forward);
+        var colRotation = Quaternion.FromToRotation(Vector3.up, Vector3.right);
+        var rowRotation = Quaternion.FromToRotation(Vector3.up, Vector3.forward);
 
-        for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 6; j++) {
-                Vector3 horizWallPos = new Vector3(_cellXyOrigin + j * _cellXyOffset, _cellXyOrigin + (0.5f + i) * _cellXyOffset, _mazeZPosition);
-                GameObject newHorizWall = Instantiate(_wall, _grid.transform);
-                newHorizWall.transform.localPosition = horizWallPos;
-                newHorizWall.transform.rotation = horizRotation;
-                _horizontalWallRenderers[i, j] = newHorizWall.GetComponent<MeshRenderer>();
+        for (int line = 0; line < 6; line++) {
+            for (int wall = 0; wall < 5; wall++) {
+                var colWallPos = new Vector3(_cellXyOrigin + line * _cellXyOffset, _cellXyOrigin + (0.5f + wall) * _cellXyOffset, _mazeZPosition);
+                GameObject newColWall = Instantiate(_wall, _grid.transform);
+                newColWall.transform.localPosition = colWallPos;
+                newColWall.transform.rotation = colRotation;
+                _columnWallRenderers[line, wall] = newColWall.GetComponent<MeshRenderer>();
 
-                Vector3 vertiWallPos = new Vector3(_cellXyOrigin + (0.5f + i) * _cellXyOffset, _cellXyOrigin + j * _cellXyOffset, _mazeZPosition);
-                GameObject newVertiWall = Instantiate(_wall, _grid.transform);
-                newVertiWall.transform.localPosition = vertiWallPos;
-                newVertiWall.transform.rotation = vertiRotation;
-                _verticalWallRenderers[i, j] = newVertiWall.GetComponent<MeshRenderer>();
+                var rowWallPos = new Vector3(_cellXyOrigin + (0.5f + wall) * _cellXyOffset, _cellXyOrigin + line * _cellXyOffset, _mazeZPosition);
+                GameObject newRowWall = Instantiate(_wall, _grid.transform);
+                newRowWall.transform.localPosition = rowWallPos;
+                newRowWall.transform.rotation = rowRotation;
+                _rowWallRenderers[line, wall] = newRowWall.GetComponent<MeshRenderer>();
             }
         }
     }
