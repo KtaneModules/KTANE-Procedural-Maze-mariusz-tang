@@ -84,4 +84,9 @@ public class MazeRenderer : MonoBehaviour {
             }
         }
     }
+
+    public void RenderMovement(Vector2Int from, Vector2Int to) {
+        _cellRenderers[from.x, from.y].material.color = _cellOffColour;
+        _cellRenderers[to.x, to.y].material.color = Color.white;
+    }
 }

@@ -10,10 +10,10 @@ public class BitMaze6x6 {
         StartPosition = start;
         GoalPosition = goal;
 
-        ColumnWalls = new Wall[7, 6];
-        RowWalls = new Wall[7, 6];
-        for (int line = 0; line < 7; line++) {
-            for (int wall = 0; wall < 6; wall++) {
+        ColumnWalls = new Wall[6, 7];
+        RowWalls = new Wall[6, 7];
+        for (int line = 0; line < 6; line++) {
+            for (int wall = 0; wall < 7; wall++) {
                 ColumnWalls[line, wall] = new Wall();
                 RowWalls[line, wall] = new Wall();
             }
@@ -67,7 +67,7 @@ public class BitMaze6x6 {
             return ColumnWalls[cell.x, cell.y + direction / 2];
         }
         else {
-            return RowWalls[cell.x + (1 - direction / 2), cell.y];
+            return RowWalls[cell.y, cell.x + (1 - direction / 2)];
         }
     }
 
@@ -75,11 +75,11 @@ public class BitMaze6x6 {
         return GetAdjacentWallInDirection(cell, (int)direction);
     }
 
-    public Wall[] GetAdjacentWalls(Vector2Int cell) {
+    public Wall[] GetAdjacentWalls(Vector2Int cell, MazeDirection startingDirection = MazeDirection.Up) {
         var walls = new Wall[4];
 
         for (int direction = 0; direction < 4; direction++) {
-            walls[direction] = GetAdjacentWallInDirection(cell, direction);
+            walls[direction] = GetAdjacentWallInDirection(cell, ((int)startingDirection + direction) % 4);
         }
 
         return walls;

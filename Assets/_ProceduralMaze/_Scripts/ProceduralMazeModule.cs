@@ -7,21 +7,18 @@ using UnityEngine;
 public class ProceduralMazeModule : MonoBehaviour {
 
     private KMSelectable[] _buttons;
-    private MazeRenderer _mazeRenderer;
-
-    private BitMaze6x6 _maze;
+    private MazeHandler _mazeHandler;
 
     private void Awake() {
-        _maze = MazeGenerator.GenerateNewMaze();
-        _mazeRenderer = GetComponentInChildren<MazeRenderer>();
-        _mazeRenderer.AssignMaze(_maze);
-        _mazeRenderer.RenderRings();
+        _mazeHandler = new MazeHandler(this);
 
         _buttons = GetComponent<KMSelectable>().Children;
     }
 
     private void Start() {
-        Array.ForEach(_buttons, b => b.OnInteract += delegate () { MazeGenerator.AssignRandomBitmap(_maze); _mazeRenderer.RenderRings(); return false; });
+        foreach (KMSelectable button in _buttons) {
+            button.OnInteract += delegate () { _mazeHandler.Move((MazeDirection)Enum.Parse(typeof(MazeDirection), button.name)); return false; };
+        }
     }
 
 }
