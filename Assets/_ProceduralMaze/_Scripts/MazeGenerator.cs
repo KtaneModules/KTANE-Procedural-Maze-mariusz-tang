@@ -54,11 +54,12 @@ public static class MazeGenerator {
         maze.CurrentSeed = seed;
     }
 
-    public static void DecideWallsAroundCell(BitMaze6x6 maze, Vector2Int cell, MazeDirection directionMoved) {
+    public static BitMaze6x6.Wall[] DecideWallsAroundCell(BitMaze6x6 maze, Vector2Int cell, MazeDirection directionMoved) {
         string seed = maze.CurrentSeed;
         int[] bitmask = maze.GetBitLineInDirection(cell, (MazeDirection)((int)(directionMoved + 1) % 4));
+        BitMaze6x6.Wall[] walls = maze.GetAdjancentUndecidedWalls(cell, (MazeDirection)((int)(directionMoved + 2) % 4));
 
-        foreach (BitMaze6x6.Wall wall in maze.GetAdjancentUndecidedWalls(cell, (MazeDirection)((int)(directionMoved + 2) % 4))) {
+        foreach (BitMaze6x6.Wall wall in walls) {
             bool even = true;
 
             for (int pos = 0; pos < 6; pos++) {
@@ -72,5 +73,6 @@ public static class MazeGenerator {
         }
 
         maze.CurrentSeed = seed;
+        return walls;
     }
 }

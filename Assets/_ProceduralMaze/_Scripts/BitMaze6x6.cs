@@ -120,5 +120,9 @@ public class BitMaze6x6 {
                 _isPresent = value;
             }
         }
+
+        public void Reset() {
+            IsDecided = false;
+        }
     }
 }

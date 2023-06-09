@@ -21,8 +21,8 @@ public class MazeRenderer : MonoBehaviour {
     private MeshRenderer[,] _cellRenderers = new MeshRenderer[6, 6];
     private MeshRenderer[,] _ringRenderers = new MeshRenderer[6, 6];
     // These are the walls in each row and column. Stored as [column/row, wall].
-    private MeshRenderer[,] _columnWallRenderers = new MeshRenderer[6, 5];
-    private MeshRenderer[,] _rowWallRenderers = new MeshRenderer[6, 5];
+    private MeshRenderer[,] _columnWallRenderers = new MeshRenderer[6, 7];
+    private MeshRenderer[,] _rowWallRenderers = new MeshRenderer[6, 7];
 
     private BitMaze6x6 _maze;
 
@@ -36,14 +36,14 @@ public class MazeRenderer : MonoBehaviour {
         var rowRotation = Quaternion.FromToRotation(Vector3.up, Vector3.forward);
 
         for (int line = 0; line < 6; line++) {
-            for (int wall = 0; wall < 5; wall++) {
-                var colWallPos = new Vector3(_cellXyOrigin + line * _cellXyOffset, _cellXyOrigin + (0.5f + wall) * _cellXyOffset, _mazeZPosition);
+            for (int wall = 0; wall < 7; wall++) {
+                var colWallPos = new Vector3(_cellXyOrigin + line * _cellXyOffset, _cellXyOrigin + (-0.5f + wall) * _cellXyOffset, _mazeZPosition);
                 GameObject newColWall = Instantiate(_wall, _grid.transform);
                 newColWall.transform.localPosition = colWallPos;
                 newColWall.transform.rotation = colRotation;
                 _columnWallRenderers[line, wall] = newColWall.GetComponent<MeshRenderer>();
 
-                var rowWallPos = new Vector3(_cellXyOrigin + (0.5f + wall) * _cellXyOffset, _cellXyOrigin + line * _cellXyOffset, _mazeZPosition);
+                var rowWallPos = new Vector3(_cellXyOrigin + (-0.5f + wall) * _cellXyOffset, _cellXyOrigin + line * _cellXyOffset, _mazeZPosition);
                 GameObject newRowWall = Instantiate(_wall, _grid.transform);
                 newRowWall.transform.localPosition = rowWallPos;
                 newRowWall.transform.rotation = rowRotation;
@@ -92,8 +92,8 @@ public class MazeRenderer : MonoBehaviour {
 
     public void RenderWalls() {
         for (int line = 0; line < 6; line++) {
-            for (int wall = 0; wall < 5; wall++) {
-                BitMaze6x6.Wall colWall = _maze.ColumnWalls[line, wall + 1];
+            for (int wall = 0; wall < 7; wall++) {
+                BitMaze6x6.Wall colWall = _maze.ColumnWalls[line, wall];
                 if (colWall.IsDecided && colWall.IsPresent) {
                     _columnWallRenderers[line, wall].enabled = true;
                 }
@@ -101,7 +101,7 @@ public class MazeRenderer : MonoBehaviour {
                     _columnWallRenderers[line, wall].enabled = false;
                 }
 
-                BitMaze6x6.Wall rowWall = _maze.RowWalls[line, wall + 1];
+                BitMaze6x6.Wall rowWall = _maze.RowWalls[line, wall];
                 if (rowWall.IsDecided && rowWall.IsPresent) {
                     _rowWallRenderers[line, wall].enabled = true;
                 }

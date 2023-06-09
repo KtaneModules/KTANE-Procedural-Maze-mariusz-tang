@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -18,19 +19,17 @@ public class MazeHandler {
 
     private Vector2Int _currentPosition;
     private Stack<Vector2Int> _visitedCells = new Stack<Vector2Int>();
+    private Stack<BitMaze6x6.Wall[]> _decidedWalls = new Stack<BitMaze6x6.Wall[]>();
+    private Stack<string> _pastSeeds = new Stack<string>();
 
     public MazeHandler(ProceduralMazeModule module) {
         _module = module;
         _maze = MazeGenerator.GenerateNewMaze();
         _currentPosition = _maze.StartPosition;
-        _visitedCells.Push(_currentPosition);
 
         _renderer = module.GetComponentInChildren<MazeRenderer>();
         _renderer.AssignMaze(_maze);
         _renderer.RenderRings();
-
-        //!
-        Debug.Log(_maze.CurrentSeed);
     }
 
     public void Move(MazeDirection direction) {
@@ -40,12 +39,14 @@ public class MazeHandler {
         else {
             Vector2Int newPosition = _currentPosition + _directionVectors[direction];
             _renderer.RenderMovement(_currentPosition, newPosition);
+            _visitedCells.Push(_currentPosition);
+            _pastSeeds.Push(_maze.CurrentSeed);
             _currentPosition = newPosition;
 
             if (!_visitedCells.Contains(_currentPosition)) {
-                MazeGenerator.DecideWallsAroundCell(_maze, _currentPosition, direction);
-                _visitedCells.Push(_currentPosition);
+                _decidedWalls.Push(MazeGenerator.DecideWallsAroundCell(_maze, _currentPosition, direction));
             }
+
 
             //!
             Debug.Log(_maze.CurrentSeed);
@@ -53,4 +54,14 @@ public class MazeHandler {
         }
     }
 
+    public void UndoMove() {
+        _renderer.RenderMovement(_currentPosition, _visitedCells.Peek());
+
+        if (!_visitedCells.Contains(_currentPosition)) {
+            Array.ForEach(_decidedWalls.Pop(), w => w.Reset());
+        }
+        _currentPosition = _visitedCells.Pop();
+        _maze.CurrentSeed = _pastSeeds.Pop();
+        _renderer.RenderWalls();
+    }
 }
