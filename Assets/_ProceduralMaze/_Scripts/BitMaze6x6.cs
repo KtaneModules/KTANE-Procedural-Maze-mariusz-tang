@@ -28,6 +28,7 @@ public class BitMaze6x6 {
         RowWalls = original.RowWalls;
     }
 
+    public string CurrentSeed { get; set; }
     // Stored as [column, row].
     public Vector2Int StartPosition { get; private set; }
     public Vector2Int GoalPosition { get; private set; }
@@ -36,7 +37,7 @@ public class BitMaze6x6 {
     public Wall[,] ColumnWalls { get; private set; }
     public Wall[,] RowWalls { get; private set; }
 
-    public int[] GetBitColumn(int colNum, bool topToBottom) {
+    public int[] GetBitColumn(int colNum, bool topToBottom = false) {
         var column = new int[6];
 
         for (int rowNum = 0; rowNum < 6; rowNum++) {
@@ -49,7 +50,7 @@ public class BitMaze6x6 {
         return column;
     }
 
-    public int[] GetBitRow(int rowNum, bool leftToRight) {
+    public int[] GetBitRow(int rowNum, bool leftToRight = false) {
         var row = new int[6];
 
         for (int colNum = 0; colNum < 6; colNum++) {
@@ -60,6 +61,17 @@ public class BitMaze6x6 {
         }
 
         return row;
+    }
+
+    public int[] GetBitLineInDirection(Vector2Int cell, MazeDirection direction) {
+        int directionIndex = (int)direction;
+
+        if (directionIndex % 2 == 0) {
+            return GetBitColumn(cell.x, direction == MazeDirection.Down);
+        }
+        else {
+            return GetBitRow(cell.y, direction == MazeDirection.Right);
+        }
     }
 
     public Wall GetAdjacentWallInDirection(Vector2Int cell, int direction) {
@@ -85,8 +97,8 @@ public class BitMaze6x6 {
         return walls;
     }
 
-    public Wall[] GetAdjancentUndecidedWalls(Vector2Int cell) {
-        return GetAdjacentWalls(cell).Where(w => w.IsDecided == false).ToArray();
+    public Wall[] GetAdjancentUndecidedWalls(Vector2Int cell, MazeDirection startingDirection = MazeDirection.Up) {
+        return GetAdjacentWalls(cell, startingDirection).Where(w => w.IsDecided == false).ToArray();
     }
 
     public class Wall {

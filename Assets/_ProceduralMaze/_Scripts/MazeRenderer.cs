@@ -52,7 +52,7 @@ public class MazeRenderer : MonoBehaviour {
         }
     }
 
-        public void AssignMaze(BitMaze6x6 maze) {
+    public void AssignMaze(BitMaze6x6 maze) {
         _maze = maze;
         RenderCellsAndGenerateRings(maze.StartPosition, maze.GoalPosition);
     }
@@ -88,5 +88,27 @@ public class MazeRenderer : MonoBehaviour {
     public void RenderMovement(Vector2Int from, Vector2Int to) {
         _cellRenderers[from.x, from.y].material.color = _cellOffColour;
         _cellRenderers[to.x, to.y].material.color = Color.white;
+    }
+
+    public void RenderWalls() {
+        for (int line = 0; line < 6; line++) {
+            for (int wall = 0; wall < 5; wall++) {
+                BitMaze6x6.Wall colWall = _maze.ColumnWalls[line, wall + 1];
+                if (colWall.IsDecided && colWall.IsPresent) {
+                    _columnWallRenderers[line, wall].enabled = true;
+                }
+                else {
+                    _columnWallRenderers[line, wall].enabled = false;
+                }
+
+                BitMaze6x6.Wall rowWall = _maze.RowWalls[line, wall + 1];
+                if (rowWall.IsDecided && rowWall.IsPresent) {
+                    _rowWallRenderers[line, wall].enabled = true;
+                }
+                else {
+                    _rowWallRenderers[line, wall].enabled = false;
+                }
+            }
+        }
     }
 }
