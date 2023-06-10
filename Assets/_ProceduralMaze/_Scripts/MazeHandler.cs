@@ -6,7 +6,7 @@ using UnityEngine;
 public class MazeHandler {
 
     // Up and Down are swapped because we are using Y going down instead of up.
-    private Dictionary<MazeDirection, Vector2Int> _directionVectors = new Dictionary<MazeDirection, Vector2Int> {
+    public static readonly Dictionary<MazeDirection, Vector2Int> DirectionVectors = new Dictionary<MazeDirection, Vector2Int> {
         { MazeDirection.Up, Vector2Int.down },
         { MazeDirection.Right, Vector2Int.right },
         { MazeDirection.Down, Vector2Int.up },
@@ -37,7 +37,7 @@ public class MazeHandler {
             Debug.Log("Bruh");
         }
         else {
-            Vector2Int newPosition = _currentPosition + _directionVectors[direction];
+            Vector2Int newPosition = _currentPosition + DirectionVectors[direction];
             _renderer.RenderMovement(_currentPosition, newPosition);
             _visitedCells.Push(_currentPosition);
             _pastSeeds.Push(_maze.CurrentSeed);
