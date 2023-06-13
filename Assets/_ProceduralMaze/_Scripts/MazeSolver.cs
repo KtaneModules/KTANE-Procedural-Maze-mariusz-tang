@@ -7,16 +7,21 @@ using UnityEngine;
 public static class MazeSolver {
 
     private static BitMaze6x6 _maze;
+    private static Vector2Int _currentPosition;
+
 
     public static bool TrySolve(BitMaze6x6 maze, Vector2Int currentPosition, out string solution) {
         _maze = maze;
+        _currentPosition = currentPosition;
         solution = string.Empty;
         return true;
     }
 
-    private static bool MazeIsBlocked(Vector2Int currentPosition) {
-        var accessibleCells = new List<Vector2Int> { currentPosition };
-        var currentDepth = new List<Vector2Int> { currentPosition };
+
+
+    private static bool MazeIsBlocked() {
+        var accessibleCells = new List<Vector2Int> { _currentPosition };
+        var currentDepth = new List<Vector2Int> { _currentPosition };
         var nextDepth = new List<Vector2Int>();
 
         while (currentDepth.Count != 0) {
@@ -25,11 +30,11 @@ public static class MazeSolver {
                     BitMaze6x6.Wall wall = _maze.GetAdjacentWallInDirection(cell, direction);
 
                     if (!wall.IsDecided || !wall.IsPresent) {
-                        Vector2Int newCell = cell + MazeHandler.DirectionVectors[(MazeDirection)direction];
+                        Vector2Int newCell = cell + MazeTraverser.DirectionVectors[(MazeDirection)direction];
                         if (newCell == _maze.GoalPosition) {
                             return false;
                         }
-                        
+
                         if (!accessibleCells.Contains(newCell)) {
                             accessibleCells.Add(newCell);
                             nextDepth.Add(newCell);
@@ -43,6 +48,20 @@ public static class MazeSolver {
         }
 
         return true;
+    }
+
+    private static int SortMoves(Move lhs, Move rhs) {
+        int lhsDistanceToCurrent = Math.Abs(lhs.FromCell.x - _currentPosition.x) + Math.Abs(lhs.FromCell.y - _currentPosition.y);
+        int rhsDistanceToCurrent = Math.Abs(rhs.FromCell.x - _currentPosition.x) + Math.Abs(rhs.FromCell.y - _currentPosition.y);
+
+        if (lhsDistanceToCurrent != rhsDistanceToCurrent) {
+            return lhsDistanceToCurrent - rhsDistanceToCurrent;
+        }
+        else {
+            int lhsDistanceToGoal = Math.Abs(lhs.FromCell.x - _maze.GoalPosition.x) + Math.Abs(lhs.FromCell.y - _maze.GoalPosition.y);
+            int rhsDistanceToGoal = Math.Abs(rhs.FromCell.x - _maze.GoalPosition.x) + Math.Abs(rhs.FromCell.y - _maze.GoalPosition.y);
+            return lhsDistanceToGoal - rhsDistanceToGoal;
+        }
     }
 
     private struct Move : IEquatable<Move> {

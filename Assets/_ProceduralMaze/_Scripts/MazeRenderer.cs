@@ -15,7 +15,7 @@ public class MazeRenderer : MonoBehaviour {
     [SerializeField] private GameObject _ring;
     [SerializeField] private GameObject _grid;
 
-    private Color _cellOffColour;
+    [SerializeField] private Color _cellOffColour;
 
     // Stored as [column, row].
     private MeshRenderer[,] _cellRenderers = new MeshRenderer[6, 6];
@@ -25,9 +25,9 @@ public class MazeRenderer : MonoBehaviour {
     private MeshRenderer[,] _rowWallRenderers = new MeshRenderer[6, 7];
 
     private BitMaze6x6 _maze;
+    private Vector2Int _currentRenderedPosition;
 
     private void Start() {
-        _cellOffColour = _cell.GetComponent<MeshRenderer>().sharedMaterial.color;
         GenerateWalls();
     }
 
@@ -55,6 +55,8 @@ public class MazeRenderer : MonoBehaviour {
     public void AssignMaze(BitMaze6x6 maze) {
         _maze = maze;
         RenderCellsAndGenerateRings(maze.StartPosition, maze.GoalPosition);
+        RenderRings();
+        _currentRenderedPosition = maze.StartPosition;
     }
 
     private void RenderCellsAndGenerateRings(Vector2Int start, Vector2Int goal) {
@@ -85,9 +87,10 @@ public class MazeRenderer : MonoBehaviour {
         }
     }
 
-    public void RenderMovement(Vector2Int from, Vector2Int to) {
-        _cellRenderers[from.x, from.y].material.color = _cellOffColour;
-        _cellRenderers[to.x, to.y].material.color = Color.white;
+    public void RenderMovementTo(Vector2Int cell) {
+        _cellRenderers[_currentRenderedPosition.x, _currentRenderedPosition.y].material.color = _cellOffColour;
+        _cellRenderers[cell.x, cell.y].material.color = Color.white;
+        _currentRenderedPosition = cell;
     }
 
     public void RenderWalls() {

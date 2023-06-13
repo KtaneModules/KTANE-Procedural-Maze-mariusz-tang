@@ -6,17 +6,30 @@ using UnityEngine;
 
 public class ProceduralMazeModule : MonoBehaviour {
 
-    private KMSelectable[] _arrows;
-    private MazeHandler _mazeHandler;
+    private ArrowButton[] _arrows;
+    private MazeTraverser _mazeTraverser;
+    private MazeRenderer _mazeRenderer;
 
     private void Awake() {
-        _mazeHandler = new MazeHandler(this);
-        _arrows = GetComponent<KMSelectable>().Children;
+        _arrows = GetComponent<KMSelectable>().Children.Select(c => c.GetComponent<ArrowButton>()).ToArray();
+        _mazeTraverser = new MazeTraverser();
+        _mazeRenderer = GetComponentInChildren<MazeRenderer>();
+        _mazeRenderer.AssignMaze(_mazeTraverser.Maze);
     }
 
     private void Start() {
-        foreach (KMSelectable arrow in _arrows) {
-            arrow.OnInteract += delegate () { _mazeHandler.Move((MazeDirection)Enum.Parse(typeof(MazeDirection), arrow.name)); return false; };
+        foreach (ArrowButton arrow in _arrows) {
+            arrow.Selectable.OnInteract += delegate () { HandlePress(arrow); return false; };
+        }
+    }
+
+    private void HandlePress(ArrowButton arrow) {
+        if (_mazeTraverser.TryMove(arrow.Direction)) {
+            _mazeRenderer.RenderMovementTo(_mazeTraverser.CurrentPosition);
+            _mazeRenderer.RenderWalls();
+        }
+        else {
+            Debug.Log("breh");
         }
     }
 }
