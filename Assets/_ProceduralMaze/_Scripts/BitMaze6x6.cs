@@ -20,14 +20,6 @@ public class BitMaze6x6 {
         }
     }
 
-    public BitMaze6x6(BitMaze6x6 original) {
-        StartPosition = original.StartPosition;
-        GoalPosition = original.GoalPosition;
-        Bitmap = original.Bitmap;
-        ColumnWalls = original.ColumnWalls;
-        RowWalls = original.RowWalls;
-    }
-
     public string CurrentSeed { get; set; }
     // Stored as [column, row].
     public Vector2Int StartPosition { get; private set; }

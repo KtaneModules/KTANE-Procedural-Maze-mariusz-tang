@@ -15,6 +15,8 @@ public class ProceduralMazeModule : MonoBehaviour {
         _mazeTraverser = new MazeTraverser();
         _mazeRenderer = GetComponentInChildren<MazeRenderer>();
         _mazeRenderer.AssignMaze(_mazeTraverser.Maze);
+        string breh;
+        Debug.Log(MazeSolver.TrySolve(_mazeTraverser, out breh));
     }
 
     private void Start() {

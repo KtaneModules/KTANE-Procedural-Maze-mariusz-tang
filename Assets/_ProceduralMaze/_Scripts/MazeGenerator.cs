@@ -44,7 +44,6 @@ public static class MazeGenerator {
                 maze.Bitmap[Rnd.Range(0, 6), line] = 1;
             }
         }
-
         var seed = string.Empty;
 
         for (int col = 0; col < 6; col++) {
@@ -65,7 +64,7 @@ public static class MazeGenerator {
             for (int pos = 0; pos < 6; pos++) {
                 if (seed[pos] == '1' && bitmask[pos] == 1) {
                     even = !even;
-                }    
+                }
             }
 
             wall.IsPresent = even;
