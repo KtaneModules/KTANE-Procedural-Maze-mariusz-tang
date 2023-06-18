@@ -48,6 +48,15 @@ public class MazeHandler {
         return true;
     }
 
+    public void Teleport(BitMaze6x6.Cell toCell) {
+        if (!HasVisited(toCell)) {
+            throw new ArgumentException("Can only teleport to cells that have been visited before!");
+        }
+        _moveHistory.Push(new Movement(_currentCell, new BitMaze6x6.Wall[0], _seed));
+        _currentCell = toCell;
+        _visitedCells.Push(_currentCell);
+    }
+
     public void UndoMove() {
         Movement move = _moveHistory.Pop();
         _visitedCells.Pop();
