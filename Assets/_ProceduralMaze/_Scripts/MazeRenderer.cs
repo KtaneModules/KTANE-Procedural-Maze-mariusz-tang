@@ -54,9 +54,9 @@ public class MazeRenderer : MonoBehaviour {
 
     public void AssignMaze(BitMaze6x6 maze) {
         _maze = maze;
-        RenderCellsAndGenerateRings(maze.StartPosition, maze.GoalPosition);
+        RenderCellsAndGenerateRings(maze.StartCell.Position, maze.GoalCell.Position);
         RenderRings();
-        _currentRenderedPosition = maze.StartPosition;
+        _currentRenderedPosition = maze.StartCell.Position;
     }
 
     private void RenderCellsAndGenerateRings(Vector2Int start, Vector2Int goal) {
@@ -82,7 +82,7 @@ public class MazeRenderer : MonoBehaviour {
     public void RenderRings() {
         for (int col = 0; col < 6; col++) {
             for (int row = 0; row < 6; row++) {
-                _ringRenderers[col, row].enabled = _maze.Bitmap[col, row] == 1;
+                _ringRenderers[col, row].enabled = _maze.Cells[col, row].Bit == 1;
             }
         }
     }
