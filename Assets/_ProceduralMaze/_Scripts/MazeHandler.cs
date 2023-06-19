@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class MazeHandler {
@@ -31,6 +32,7 @@ public class MazeHandler {
         get { return _currentCell.Position; }
         set { _currentCell = Maze.Cells[value.x, value.y]; }
     }
+    public IEnumerable<BitMaze6x6.Cell> VisitedCells { get { return _visitedCells.ToArray().Distinct(); } }
 
     public bool HasVisited(BitMaze6x6.Cell cell) => _visitedCells.Contains(cell);
 
@@ -63,6 +65,13 @@ public class MazeHandler {
         _currentCell = move.FromCell;
         Array.ForEach(move.RevealedWalls, w => w.Reset());
         _seed = move.OldSeed;
+    }
+
+    public void ResetMaze() {
+        while (_visitedCells.Count() > 1) {
+            UndoMove();
+        }
+        MazeGenerator.AssignRandomBitmap(Maze, out _seed);
     }
 
     public class Movement {

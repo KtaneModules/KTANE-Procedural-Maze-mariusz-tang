@@ -130,7 +130,6 @@ public class BitMaze6x6 {
             var walls = new Wall[4];
 
             for (int d = 0; d < 4; d++) {
-                Debug.Log($"Checking direction {(MazeDirection)(((int)direction + d) % 4)}, which is decided: {GetAdjacentWall((MazeDirection)(((int)direction + d) % 4)).IsDecided}");
                 walls[d] = GetAdjacentWall((MazeDirection)(((int)direction + d) % 4));
             }
 
