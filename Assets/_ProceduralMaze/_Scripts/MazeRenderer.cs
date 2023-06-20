@@ -8,6 +8,7 @@ public class MazeRenderer : MonoBehaviour {
     private const float _cellXyOrigin = 0.005f;
     private const float _cellXyOffset = -0.002f;
     private const float _mazeZPosition = 0.00067f;
+    private const float _lightYPosition = 0.0008f;
 
     [SerializeField] private GameObject _cell;
     [SerializeField] private GameObject _triangle;
@@ -15,7 +16,12 @@ public class MazeRenderer : MonoBehaviour {
     [SerializeField] private GameObject _ring;
     [SerializeField] private GameObject _grid;
 
-    [SerializeField] private Color _cellOffColour;
+    [SerializeField] private Material _cellOffMat;
+    [SerializeField] private Material _cellOnMat;
+    [SerializeField] private Material _goalMat;
+
+    [SerializeField] private Transform _currentCellLight;
+    [SerializeField] private Transform _goalCellLight;
 
     // Stored as [column, row].
     private MeshRenderer[,] _cellRenderers = new MeshRenderer[6, 6];
@@ -27,8 +33,10 @@ public class MazeRenderer : MonoBehaviour {
     private BitMaze6x6 _maze;
     private Vector2Int _currentRenderedPosition;
 
-    private void Start() {
+    private void Awake() {
         GenerateWalls();
+        _currentCellLight.gameObject.SetActive(true);
+        _goalCellLight.gameObject.SetActive(true);
     }
 
     private void GenerateWalls() {
@@ -64,13 +72,22 @@ public class MazeRenderer : MonoBehaviour {
             for (int j = 0; j < 6; j++) {
                 Vector3 position = new Vector3(_cellXyOrigin + i * _cellXyOffset, _cellXyOrigin + j * _cellXyOffset, _mazeZPosition);
 
-                GameObject mazeObjectPrefab = (i == goal.x && j == goal.y) ? _triangle : _cell;
-                GameObject mazeObject = Instantiate(mazeObjectPrefab, _grid.transform);
-                mazeObject.transform.localPosition = position;
-                _cellRenderers[i, j] = mazeObject.GetComponent<MeshRenderer>();
-                if (i == start.x && j == start.y) {
-                    _cellRenderers[i, j].material.color = Color.white;
+                GameObject mazeObject;
+                if (i == goal.x && j == goal.y) {
+                    mazeObject = Instantiate(_triangle, _grid.transform);
+                    _goalCellLight.localPosition = new Vector3(_cellXyOrigin + i * _cellXyOffset, _cellXyOrigin + j * _cellXyOffset, _lightYPosition);
+                    _cellRenderers[i, j] = mazeObject.GetComponent<MeshRenderer>();
                 }
+                else {
+                    mazeObject = Instantiate(_cell, _grid.transform);
+                    _cellRenderers[i, j] = mazeObject.GetComponent<MeshRenderer>();
+                    if (i == start.x && j == start.y) {
+                        _cellRenderers[i, j].material = _cellOnMat;
+                        _currentCellLight.localPosition = new Vector3(_cellXyOrigin + i * _cellXyOffset, _cellXyOrigin + j * _cellXyOffset, _lightYPosition);
+                        _currentRenderedPosition = new Vector2Int(i, j);
+                    }
+                }
+                mazeObject.transform.localPosition = position;
 
                 GameObject newRing = Instantiate(_ring, _grid.transform);
                 newRing.transform.localPosition = position;
@@ -87,10 +104,21 @@ public class MazeRenderer : MonoBehaviour {
         }
     }
 
-    public void RenderMovementTo(Vector2Int cell) {
-        _cellRenderers[_currentRenderedPosition.x, _currentRenderedPosition.y].material.color = _cellOffColour;
-        _cellRenderers[cell.x, cell.y].material.color = Color.white;
-        _currentRenderedPosition = cell;
+    public void RenderMovementTo(Vector2Int position) {
+        if (position == _maze.GoalCell.Position) {
+            _goalCellLight.gameObject.SetActive(false);
+        }
+        if (_currentRenderedPosition == _maze.GoalCell.Position) {
+            _goalCellLight.gameObject.SetActive(true);
+            _cellRenderers[_currentRenderedPosition.x, _currentRenderedPosition.y].material = _goalMat;
+        }
+        else {
+            _cellRenderers[_currentRenderedPosition.x, _currentRenderedPosition.y].material = _cellOffMat;
+        }
+
+        _cellRenderers[position.x, position.y].material = _cellOnMat;
+        _currentCellLight.localPosition = new Vector3(_cellXyOrigin + position.x * _cellXyOffset, _cellXyOrigin + position.y * _cellXyOffset, _lightYPosition);
+        _currentRenderedPosition = position;
     }
 
     public void RenderWalls() {

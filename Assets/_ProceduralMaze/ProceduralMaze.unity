@@ -192,6 +192,57 @@ Prefab:
       propertyPath: _arrows.Array.data[3]
       value: 
       objectReference: {fileID: 1308269818}
+    - target: {fileID: 1516302744306406, guid: 02700b34941fac04a99ee0345a44f578, type: 2}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1252544179778936, guid: 02700b34941fac04a99ee0345a44f578, type: 2}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1559386866398358, guid: 02700b34941fac04a99ee0345a44f578, type: 2}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1975639273350320, guid: 02700b34941fac04a99ee0345a44f578, type: 2}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 23266633574315816, guid: 02700b34941fac04a99ee0345a44f578,
+        type: 2}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: a87a26f17dc39b349b45c0a8cd5add49, type: 2}
+    - target: {fileID: 114810396078238448, guid: 02700b34941fac04a99ee0345a44f578,
+        type: 2}
+      propertyPath: _cellOffMat
+      value: 
+      objectReference: {fileID: 2100000, guid: 453f38d41b633ef4f8b5a1734492815c, type: 2}
+    - target: {fileID: 114810396078238448, guid: 02700b34941fac04a99ee0345a44f578,
+        type: 2}
+      propertyPath: _cellOnMat
+      value: 
+      objectReference: {fileID: 2100000, guid: a87a26f17dc39b349b45c0a8cd5add49, type: 2}
+    - target: {fileID: 114810396078238448, guid: 02700b34941fac04a99ee0345a44f578,
+        type: 2}
+      propertyPath: _light
+      value: 
+      objectReference: {fileID: 1299643408}
+    - target: {fileID: 114810396078238448, guid: 02700b34941fac04a99ee0345a44f578,
+        type: 2}
+      propertyPath: _goalCellLight
+      value: 
+      objectReference: {fileID: 940385017}
+    - target: {fileID: 114810396078238448, guid: 02700b34941fac04a99ee0345a44f578,
+        type: 2}
+      propertyPath: _currentCellLight
+      value: 
+      objectReference: {fileID: 1299643408}
+    - target: {fileID: 114810396078238448, guid: 02700b34941fac04a99ee0345a44f578,
+        type: 2}
+      propertyPath: _goalMat
+      value: 
+      objectReference: {fileID: 2100000, guid: d2538a4c5da87e04c8fa7d0725252711, type: 2}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 02700b34941fac04a99ee0345a44f578, type: 2}
   m_IsPrefabParent: 0
@@ -302,6 +353,76 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!4 &855107438 stripped
+Transform:
+  m_PrefabParentObject: {fileID: 4609581696318718, guid: 02700b34941fac04a99ee0345a44f578,
+    type: 2}
+  m_PrefabInternal: {fileID: 32910908}
+--- !u!1 &940385016
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 940385017}
+  - component: {fileID: 940385018}
+  m_Layer: 0
+  m_Name: GoalCellLight
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &940385017
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 940385016}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.005000001, y: 0.0050000013, z: 0.0007999989}
+  m_LocalScale: {x: 1.0000011, y: 1.000001, z: 1.0000007}
+  m_Children: []
+  m_Father: {fileID: 855107438}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!108 &940385018
+Light:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 940385016}
+  m_Enabled: 1
+  serializedVersion: 8
+  m_Type: 2
+  m_Color: {r: 0, g: 0.7921569, b: 1, a: 1}
+  m_Intensity: 17.7
+  m_Range: 0.015
+  m_SpotAngle: 30
+  m_CookieSize: 10
+  m_Shadows:
+    m_Type: 0
+    m_Resolution: -1
+    m_CustomResolution: -1
+    m_Strength: 1
+    m_Bias: 0.05
+    m_NormalBias: 0.4
+    m_NearPlane: 0.2
+  m_Cookie: {fileID: 0}
+  m_DrawHalo: 0
+  m_Flare: {fileID: 0}
+  m_RenderMode: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_Lightmapping: 4
+  m_AreaSize: {x: 1, y: 1}
+  m_BounceIntensity: 1
+  m_ColorTemperature: 6570
+  m_UseColorTemperature: 0
+  m_ShadowRadius: 0
+  m_ShadowAngle: 0
 --- !u!114 &1124216903 stripped
 MonoBehaviour:
   m_PrefabParentObject: {fileID: 114796394101647938, guid: 02700b34941fac04a99ee0345a44f578,
@@ -314,6 +435,71 @@ MonoBehaviour:
     type: 2}
   m_PrefabInternal: {fileID: 32910908}
   m_Script: {fileID: 11500000, guid: f27abe26b82062c4795c61a4f3b802dc, type: 3}
+--- !u!1 &1299643407
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 1299643408}
+  - component: {fileID: 1299643409}
+  m_Layer: 0
+  m_Name: CurrentCellLight
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &1299643408
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1299643407}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.00181, y: 0.005, z: 0.0008}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 855107438}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!108 &1299643409
+Light:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1299643407}
+  m_Enabled: 1
+  serializedVersion: 8
+  m_Type: 2
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Intensity: 17.7
+  m_Range: 0.015
+  m_SpotAngle: 30
+  m_CookieSize: 10
+  m_Shadows:
+    m_Type: 0
+    m_Resolution: -1
+    m_CustomResolution: -1
+    m_Strength: 1
+    m_Bias: 0.05
+    m_NormalBias: 0.4
+    m_NearPlane: 0.2
+  m_Cookie: {fileID: 0}
+  m_DrawHalo: 0
+  m_Flare: {fileID: 0}
+  m_RenderMode: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_Lightmapping: 4
+  m_AreaSize: {x: 1, y: 1}
+  m_BounceIntensity: 1
+  m_ColorTemperature: 6570
+  m_UseColorTemperature: 0
+  m_ShadowRadius: 0
+  m_ShadowAngle: 0
 --- !u!114 &1308269818 stripped
 MonoBehaviour:
   m_PrefabParentObject: {fileID: 114658152446667650, guid: 02700b34941fac04a99ee0345a44f578,
