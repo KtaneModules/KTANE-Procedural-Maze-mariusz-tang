@@ -20,12 +20,13 @@ public class MazeHandler {
     private Stack<Movement> _moveHistory = new Stack<Movement>();
     private Stack<BitMaze6x6.Cell> _visitedCells = new Stack<BitMaze6x6.Cell>();
 
-
     public MazeHandler() {
         Maze = MazeGenerator.GenerateNewMaze(out _seed);
         _currentCell = Maze.StartCell;
         _visitedCells.Push(_currentCell);
     }
+
+    public bool IsReady { get; set; }
 
     public BitMaze6x6 Maze { get; private set; }
     public Vector2Int CurrentPosition {

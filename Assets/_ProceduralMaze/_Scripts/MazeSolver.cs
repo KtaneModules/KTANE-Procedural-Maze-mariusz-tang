@@ -19,7 +19,7 @@ public static class MazeSolver {
         moveTree.Push(GetNextMoves());
 
         int count = 0;
-        while (moveTree.Any() && count < 150) {
+        while (moveTree.Any() && count < 2000) {
             List<RevealMove> currentMoveSet = moveTree.Peek();
             if (currentMoveSet.Any()) {
                 RevealMove nextMove = currentMoveSet[0];
@@ -32,6 +32,7 @@ public static class MazeSolver {
 
                 if (_traverser.CurrentPosition == _traverser.Maze.GoalCell.Position) {
                     solution = GetSolutionString(currentPath);
+                    _traverser.IsReady = true;
                     return true;
                 }
             }
@@ -91,7 +92,7 @@ public static class MazeSolver {
                 solution = $"{move.Direction.ToString()[0]}{solution}";
             }
             else {
-                solution = $"{move.Direction.ToString()[0]} | {previousMove.FromCell.Position.x}, {previousMove.FromCell.Position.y} {solution}";
+                solution = $"{move.Direction.ToString()[0]} | {"ABCDEF"[previousMove.FromCell.Position.x]}{previousMove.FromCell.Position.y + 1} {solution}";
             }
             _traverser.UndoMove();
             _traverser.UndoMove();

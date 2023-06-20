@@ -3,12 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using Rnd = UnityEngine.Random;
 
 public static class MazeGenerator {
 
+    // Use System.Random because UnityEngine.Random cannot be used in threads other than the main thread.
+    private static System.Random _rnd = new System.Random();
+
     public static BitMaze6x6 GenerateNewMaze(out string seed) {
-        Vector2Int start = new Vector2Int(Rnd.Range(0, 2) * 5, Rnd.Range(0, 2) * 5);
+        Vector2Int start = new Vector2Int(_rnd.Next(0, 2) * 5, _rnd.Next(0, 2) * 5);
         Vector2Int end = Vector2Int.one * 5 - start;
         var maze = new BitMaze6x6(start, end);
         AssignRandomBitmap(maze, out seed);
@@ -18,16 +20,16 @@ public static class MazeGenerator {
     public static void AssignRandomBitmap(BitMaze6x6 maze, out string seed) {
         for (int col = 0; col < 6; col++) {
             for (int row = 0; row < 6; row++) {
-                maze.Cells[col, row].Bit = Rnd.Range(0, 3) == 0 ? 1 : 0;
+                maze.Cells[col, row].Bit = _rnd.Next(0, 3) == 0 ? 1 : 0;
             }
         }
 
         for (int line = 0; line < 6; line++) {
             if (!maze.GetBitColumn(line).Contains(1)) {
-                maze.Cells[line, Rnd.Range(0, 6)].Bit = 1;
+                maze.Cells[line, _rnd.Next(0, 6)].Bit = 1;
             }
             if (!maze.GetBitRow(line).Contains(1)) {
-                maze.Cells[Rnd.Range(0, 6), line].Bit = 1;
+                maze.Cells[_rnd.Next(0, 6), line].Bit = 1;
             }
         }
         seed = string.Empty;
