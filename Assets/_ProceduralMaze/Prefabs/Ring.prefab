@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: 4564248651969334}
   - component: {fileID: 33820270161591382}
   - component: {fileID: 23465907891157590}
+  - component: {fileID: 114081382883724658}
   m_Layer: 0
   m_Name: Ring
   m_TagString: Untagged
@@ -82,3 +83,16 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1879935510961890}
   m_Mesh: {fileID: 4300000, guid: f6747411fae6fac4ca91fdcbe0717ed4, type: 3}
+--- !u!114 &114081382883724658
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1879935510961890}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1005838349, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShaderNames:
+  - Unlit/Color

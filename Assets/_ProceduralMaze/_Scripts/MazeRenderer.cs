@@ -9,6 +9,7 @@ public class MazeRenderer : MonoBehaviour {
     private const float _cellXyOffset = -0.002f;
     private const float _mazeZPosition = 0.00067f;
     private const float _lightYPosition = 0.0008f;
+    private const float _lightIntensity = 17.7f;
 
     [SerializeField] private GameObject _cell;
     [SerializeField] private GameObject _triangle;
@@ -20,11 +21,8 @@ public class MazeRenderer : MonoBehaviour {
     [SerializeField] private Material _cellOnMat;
     [SerializeField] private Material _goalMat;
 
-    [SerializeField] private Transform _currentCellLight;
-    [SerializeField] private Transform _goalCellLight;
-
     // Stored as [column, row].
-    private MeshRenderer[,] _cellRenderers = new MeshRenderer[6, 6];
+    private IMazeCell[,] _cells = new IMazeCell[6, 6];
     private MeshRenderer[,] _ringRenderers = new MeshRenderer[6, 6];
     // These are the walls in each row and column. Stored as [column/row, wall].
     private MeshRenderer[,] _columnWallRenderers = new MeshRenderer[6, 7];
@@ -35,8 +33,6 @@ public class MazeRenderer : MonoBehaviour {
 
     private void Awake() {
         GenerateWalls();
-        _currentCellLight.gameObject.SetActive(true);
-        _goalCellLight.gameObject.SetActive(true);
     }
 
     private void GenerateWalls() {
@@ -72,22 +68,13 @@ public class MazeRenderer : MonoBehaviour {
             for (int j = 0; j < 6; j++) {
                 Vector3 position = new Vector3(_cellXyOrigin + i * _cellXyOffset, _cellXyOrigin + j * _cellXyOffset, _mazeZPosition);
 
-                GameObject mazeObject;
                 if (i == goal.x && j == goal.y) {
-                    mazeObject = Instantiate(_triangle, _grid.transform);
-                    _goalCellLight.localPosition = new Vector3(_cellXyOrigin + i * _cellXyOffset, _cellXyOrigin + j * _cellXyOffset, _lightYPosition);
-                    _cellRenderers[i, j] = mazeObject.GetComponent<MeshRenderer>();
+                    _cells[i, j] = new GoalCell(_triangle, position, _grid.transform);
                 }
                 else {
-                    mazeObject = Instantiate(_cell, _grid.transform);
-                    _cellRenderers[i, j] = mazeObject.GetComponent<MeshRenderer>();
-                    if (i == start.x && j == start.y) {
-                        _cellRenderers[i, j].material = _cellOnMat;
-                        _currentCellLight.localPosition = new Vector3(_cellXyOrigin + i * _cellXyOffset, _cellXyOrigin + j * _cellXyOffset, _lightYPosition);
-                        _currentRenderedPosition = new Vector2Int(i, j);
-                    }
+                    _cells[i, j] = new NormalCell(_cell, position, _grid.transform, _cellOffMat, _cellOnMat);
+                    _cells[i, j].SetLightState(i == start.x && j == start.y);
                 }
-                mazeObject.transform.localPosition = position;
 
                 GameObject newRing = Instantiate(_ring, _grid.transform);
                 newRing.transform.localPosition = position;
@@ -105,19 +92,8 @@ public class MazeRenderer : MonoBehaviour {
     }
 
     public void RenderMovementTo(Vector2Int position) {
-        if (position == _maze.GoalCell.Position) {
-            _goalCellLight.gameObject.SetActive(false);
-        }
-        if (_currentRenderedPosition == _maze.GoalCell.Position) {
-            _goalCellLight.gameObject.SetActive(true);
-            _cellRenderers[_currentRenderedPosition.x, _currentRenderedPosition.y].material = _goalMat;
-        }
-        else {
-            _cellRenderers[_currentRenderedPosition.x, _currentRenderedPosition.y].material = _cellOffMat;
-        }
-
-        _cellRenderers[position.x, position.y].material = _cellOnMat;
-        _currentCellLight.localPosition = new Vector3(_cellXyOrigin + position.x * _cellXyOffset, _cellXyOrigin + position.y * _cellXyOffset, _lightYPosition);
+        _cells[position.x, position.y].SetLightState(true);
+        _cells[_currentRenderedPosition.x, _currentRenderedPosition.y].SetLightState(false);
         _currentRenderedPosition = position;
     }
 
@@ -139,6 +115,67 @@ public class MazeRenderer : MonoBehaviour {
                 else {
                     _rowWallRenderers[line, wall].enabled = false;
                 }
+            }
+        }
+    }
+
+    private interface IMazeCell {
+        void SetLightState(bool setToLit);
+    }
+
+    private class NormalCell : IMazeCell {
+
+        private Material _offMat;
+        private Material _onMat;
+
+        private MeshRenderer _renderer;
+        private Light _light;
+
+        public NormalCell(GameObject prefab, Vector3 position, Transform parent, Material offMat, Material onMat) {
+            GameObject cell = Instantiate(prefab, parent);
+            cell.transform.localPosition = position;
+            _renderer = cell.GetComponent<MeshRenderer>();
+            _light = cell.GetComponentInChildren<Light>();
+            _light.intensity = 0;
+            _offMat = offMat;
+            _onMat = onMat;
+        }
+
+        public void SetLightState(bool setToLit) {
+            if (!setToLit) {
+                _light.intensity = 0;
+                _renderer.material = _offMat;
+            }
+            else {
+                _light.intensity = _lightIntensity;
+                _renderer.material = _onMat;
+            }
+        }
+    }
+
+    private class GoalCell : IMazeCell {
+
+        private static readonly Color _goalBlue = new Color(0, 0.79f, 1);
+
+        private MeshRenderer _renderer;
+        private Light _light;
+
+        public GoalCell(GameObject prefab, Vector3 position, Transform parent) {
+            GameObject cell = Instantiate(prefab, parent);
+            cell.transform.localPosition = position;
+            _renderer = cell.GetComponent<MeshRenderer>();
+            _light = cell.GetComponentInChildren<Light>();
+        }
+
+        // Setting the light state to false on the goal cell actually makes it blue (unoccupied).
+        public void SetLightState(bool setToLit) {
+            if (!setToLit) {
+                _light.color = _goalBlue;
+                _renderer.material.color = _goalBlue;
+            }
+            else {
+                _light.color = Color.white;
+                _renderer.material.color = Color.white;
             }
         }
     }
