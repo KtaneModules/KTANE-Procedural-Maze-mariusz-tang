@@ -8,8 +8,8 @@ public class MazeRenderer : MonoBehaviour {
     private const float _cellXyOrigin = 0.005f;
     private const float _cellXyOffset = -0.002f;
     private const float _mazeZPosition = 0.00067f;
-    private const float _lightYPosition = 0.0008f;
     private const float _lightIntensity = 17.7f;
+    private const float _transitionTime = 0.2f;
 
     [SerializeField] private GameObject _cell;
     [SerializeField] private GameObject _triangle;
@@ -69,10 +69,10 @@ public class MazeRenderer : MonoBehaviour {
                 Vector3 position = new Vector3(_cellXyOrigin + i * _cellXyOffset, _cellXyOrigin + j * _cellXyOffset, _mazeZPosition);
 
                 if (i == goal.x && j == goal.y) {
-                    _cells[i, j] = new GoalCell(_triangle, position, _grid.transform);
+                    _cells[i, j] = new GoalCell(this, _triangle, position, _grid.transform);
                 }
                 else {
-                    _cells[i, j] = new NormalCell(_cell, position, _grid.transform, _cellOffMat, _cellOnMat);
+                    _cells[i, j] = new NormalCell(this, _cell, position, _grid.transform, _cellOffMat, _cellOnMat);
                     _cells[i, j].SetLightState(i == start.x && j == start.y);
                 }
 
@@ -125,13 +125,16 @@ public class MazeRenderer : MonoBehaviour {
 
     private class NormalCell : IMazeCell {
 
+        private MazeRenderer _parentRenderer;
+        private Coroutine _transition;
+
         private Material _offMat;
         private Material _onMat;
 
         private MeshRenderer _renderer;
         private Light _light;
 
-        public NormalCell(GameObject prefab, Vector3 position, Transform parent, Material offMat, Material onMat) {
+        public NormalCell(MazeRenderer parentRenderer, GameObject prefab, Vector3 position, Transform parent, Material offMat, Material onMat) {
             GameObject cell = Instantiate(prefab, parent);
             cell.transform.localPosition = position;
             _renderer = cell.GetComponent<MeshRenderer>();
@@ -139,15 +142,33 @@ public class MazeRenderer : MonoBehaviour {
             _light.intensity = 0;
             _offMat = offMat;
             _onMat = onMat;
+            _parentRenderer = parentRenderer;
         }
 
         public void SetLightState(bool setToLit) {
+            if (_transition != null) {
+                _parentRenderer.StopCoroutine(_transition);
+            }
+            _transition = _parentRenderer.StartCoroutine(Transition(setToLit));
+        }
+
+        private IEnumerator Transition(bool setToLit) {
+            float oldIntensity = _light.intensity;
+            float newIntensity = setToLit ? _lightIntensity : 0;
+            float elapsedTime = 0;
+
             if (!setToLit) {
-                _light.intensity = 0;
                 _renderer.material = _offMat;
             }
-            else {
-                _light.intensity = _lightIntensity;
+
+            while (elapsedTime < _transitionTime) {
+                elapsedTime += Time.deltaTime;
+                _light.intensity = Mathf.Lerp(oldIntensity, newIntensity, elapsedTime / _transitionTime);
+                yield return null;
+            }
+            _light.intensity = newIntensity;
+
+            if (setToLit) {
                 _renderer.material = _onMat;
             }
         }
@@ -155,28 +176,44 @@ public class MazeRenderer : MonoBehaviour {
 
     private class GoalCell : IMazeCell {
 
+        private MazeRenderer _parentRenderer;
+        private Coroutine _transition;
+
         private static readonly Color _goalBlue = new Color(0, 0.79f, 1);
 
         private MeshRenderer _renderer;
         private Light _light;
 
-        public GoalCell(GameObject prefab, Vector3 position, Transform parent) {
+        public GoalCell(MazeRenderer parentRenderer, GameObject prefab, Vector3 position, Transform parent) {
             GameObject cell = Instantiate(prefab, parent);
             cell.transform.localPosition = position;
             _renderer = cell.GetComponent<MeshRenderer>();
             _light = cell.GetComponentInChildren<Light>();
+            _parentRenderer = parentRenderer;
         }
 
         // Setting the light state to false on the goal cell actually makes it blue (unoccupied).
         public void SetLightState(bool setToLit) {
-            if (!setToLit) {
-                _light.color = _goalBlue;
-                _renderer.material.color = _goalBlue;
+            if (_transition != null) {
+                _parentRenderer.StopCoroutine(_transition);
             }
-            else {
-                _light.color = Color.white;
-                _renderer.material.color = Color.white;
+            _transition = _parentRenderer.StartCoroutine(Transition(setToLit));
+        }
+
+        private IEnumerator Transition(bool setToLit) {
+            Color oldColor = _light.color;
+            Color newColor = setToLit ? Color.white : _goalBlue;
+            float elapsedTime = 0;
+
+            while (elapsedTime < _transitionTime) {
+                elapsedTime += Time.deltaTime;
+                Color currentColor = Color.Lerp(oldColor, newColor, elapsedTime / _transitionTime);
+                _light.color = currentColor;
+                _renderer.material.color = currentColor;
+                yield return null;
             }
+            _light.color = newColor;
+            _renderer.material.color = newColor;
         }
     }
 }

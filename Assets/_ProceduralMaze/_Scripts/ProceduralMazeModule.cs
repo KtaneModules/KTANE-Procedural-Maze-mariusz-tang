@@ -23,7 +23,7 @@ public class ProceduralMazeModule : MonoBehaviour {
         _mazeRenderer = GetComponentInChildren<MazeRenderer>();
         _mazeRenderer.AssignMaze(_mazeHandler.Maze);
 
-        Log("To read the example solutions, follow the directions reaching a coordinate, then go to that coordinate, continue following the directions, and so on.");
+        Log("To read the example solutions, follow the directions reaching a coordinate, then go to that coordinate without visiting any new cells, then continue following the directions, and so on.");
     }
 
     private void Start() {
