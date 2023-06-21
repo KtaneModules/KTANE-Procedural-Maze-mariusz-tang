@@ -7,6 +7,8 @@ using UnityEngine;
 
 public class ProceduralMazeModule : MonoBehaviour {
 
+    [SerializeField] private KMBombModule _module;
+
     private ArrowButton[] _arrows;
     private MazeHandler _mazeHandler;
     private MazeRenderer _mazeRenderer;
@@ -21,17 +23,17 @@ public class ProceduralMazeModule : MonoBehaviour {
         _arrows = GetComponent<KMSelectable>().Children.Select(c => c.GetComponent<ArrowButton>()).ToArray();
         _mazeHandler = new MazeHandler();
         _mazeRenderer = GetComponentInChildren<MazeRenderer>();
-        _mazeRenderer.AssignMaze(_mazeHandler.Maze);
 
         Log("To read the example solutions, follow the directions reaching a coordinate, then go to that coordinate without visiting any new cells, then continue following the directions, and so on.");
     }
 
     private void Start() {
+
         foreach (ArrowButton arrow in _arrows) {
             arrow.Selectable.OnInteract += delegate () { HandlePress(arrow); return false; };
         }
 
-        StartCoroutine(LoadMaze());
+        _module.OnActivate += () => { StartCoroutine(LoadMaze()); _mazeRenderer.AssignMaze(_mazeHandler.Maze);  };
     }
 
     private IEnumerator LoadMaze() {

@@ -9,6 +9,8 @@ public class MazeRenderer : MonoBehaviour {
     private const float _cellXyOffset = -0.002f;
     private const float _mazeZPosition = 0.00067f;
     private const float _lightIntensity = 17.7f;
+    private const float _lightRange = 0.015f;
+    private const float _initialLightScale = 5.95f;
     private const float _transitionTime = 0.2f;
 
     [SerializeField] private GameObject _cell;
@@ -19,7 +21,6 @@ public class MazeRenderer : MonoBehaviour {
 
     [SerializeField] private Material _cellOffMat;
     [SerializeField] private Material _cellOnMat;
-    [SerializeField] private Material _goalMat;
 
     // Stored as [column, row].
     private IMazeCell[,] _cells = new IMazeCell[6, 6];
@@ -127,6 +128,7 @@ public class MazeRenderer : MonoBehaviour {
 
         private MazeRenderer _parentRenderer;
         private Coroutine _transition;
+        private bool _isLit;
 
         private Material _offMat;
         private Material _onMat;
@@ -134,43 +136,73 @@ public class MazeRenderer : MonoBehaviour {
         private MeshRenderer _renderer;
         private Light _light;
 
+        private float _activeLightRange;
+
         public NormalCell(MazeRenderer parentRenderer, GameObject prefab, Vector3 position, Transform parent, Material offMat, Material onMat) {
             GameObject cell = Instantiate(prefab, parent);
             cell.transform.localPosition = position;
             _renderer = cell.GetComponent<MeshRenderer>();
             _light = cell.GetComponentInChildren<Light>();
             _light.intensity = 0;
-            _offMat = offMat;
-            _onMat = onMat;
+            _offMat = new Material(offMat);
+            _onMat = new Material(onMat);
             _parentRenderer = parentRenderer;
+            _light.range = parentRenderer.transform.lossyScale.x / _initialLightScale * _lightRange;
         }
 
         public void SetLightState(bool setToLit) {
             if (_transition != null) {
                 _parentRenderer.StopCoroutine(_transition);
             }
-            _transition = _parentRenderer.StartCoroutine(Transition(setToLit));
+            if (setToLit) {
+                _transition = _parentRenderer.StartCoroutine(TransitionToColour(Color.white));
+            }
+            else {
+                _transition = _parentRenderer.StartCoroutine(TransitionToOff());
+            }
         }
 
-        private IEnumerator Transition(bool setToLit) {
+        private IEnumerator TransitionToColour(Color newColour) {
+            return TransitionToColour(newColour, newColour);
+        }
+
+        private IEnumerator TransitionToColour(Color newColour, Color newCellMatColour) {
             float oldIntensity = _light.intensity;
-            float newIntensity = setToLit ? _lightIntensity : 0;
+            float newIntensity = _lightIntensity;
+            Color oldColour = _isLit ? _light.color : newColour;
+            Color oldMatColour = _renderer.material.color;
             float elapsedTime = 0;
 
-            if (!setToLit) {
-                _renderer.material = _offMat;
-            }
+            _isLit = true;
 
             while (elapsedTime < _transitionTime) {
                 elapsedTime += Time.deltaTime;
                 _light.intensity = Mathf.Lerp(oldIntensity, newIntensity, elapsedTime / _transitionTime);
+                _light.color = Color.Lerp(oldColour, newColour, elapsedTime / _transitionTime);
+                _renderer.material.color = Color.Lerp(oldMatColour, newCellMatColour, elapsedTime / _transitionTime);
                 yield return null;
             }
             _light.intensity = newIntensity;
+            _light.color = newColour;
+            _onMat.color = newCellMatColour;
 
-            if (setToLit) {
-                _renderer.material = _onMat;
+            _renderer.material = _onMat;
+        }
+
+        private IEnumerator TransitionToOff() {
+            float oldIntensity = _light.intensity;
+            float elapsedTime = 0;
+
+            yield return null;
+            _isLit = false;
+            _renderer.material = _offMat;
+
+            while (elapsedTime < _transitionTime) {
+                elapsedTime += Time.deltaTime;
+                _light.intensity = Mathf.Lerp(oldIntensity, 0, elapsedTime / _transitionTime);
+                yield return null;
             }
+            _light.intensity = 0;
         }
     }
 
@@ -190,6 +222,7 @@ public class MazeRenderer : MonoBehaviour {
             _renderer = cell.GetComponent<MeshRenderer>();
             _light = cell.GetComponentInChildren<Light>();
             _parentRenderer = parentRenderer;
+            _light.range = parentRenderer.transform.lossyScale.x / _initialLightScale * _lightRange;
         }
 
         // Setting the light state to false on the goal cell actually makes it blue (unoccupied).
@@ -197,23 +230,22 @@ public class MazeRenderer : MonoBehaviour {
             if (_transition != null) {
                 _parentRenderer.StopCoroutine(_transition);
             }
-            _transition = _parentRenderer.StartCoroutine(Transition(setToLit));
+            _transition = _parentRenderer.StartCoroutine(Transition(setToLit ? Color.white : _goalBlue));
         }
 
-        private IEnumerator Transition(bool setToLit) {
-            Color oldColor = _light.color;
-            Color newColor = setToLit ? Color.white : _goalBlue;
+        private IEnumerator Transition(Color newColour) {
+            Color oldColour = _light.color;
             float elapsedTime = 0;
 
             while (elapsedTime < _transitionTime) {
                 elapsedTime += Time.deltaTime;
-                Color currentColor = Color.Lerp(oldColor, newColor, elapsedTime / _transitionTime);
+                Color currentColor = Color.Lerp(oldColour, newColour, elapsedTime / _transitionTime);
                 _light.color = currentColor;
                 _renderer.material.color = currentColor;
                 yield return null;
             }
-            _light.color = newColor;
-            _renderer.material.color = newColor;
+            _light.color = newColour;
+            _renderer.material.color = newColour;
         }
     }
 }
