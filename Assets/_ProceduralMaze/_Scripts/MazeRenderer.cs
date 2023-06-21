@@ -8,9 +8,6 @@ public class MazeRenderer : MonoBehaviour {
     private const float _cellXyOrigin = 0.005f;
     private const float _cellXyOffset = -0.002f;
     private const float _mazeZPosition = 0.00067f;
-    private const float _lightIntensity = 17.7f;
-    private const float _lightRange = 0.015f;
-    private const float _initialLightScale = 5.95f;
     private const float _transitionTime = 0.2f;
 
     [SerializeField] private GameObject _cell;
@@ -128,26 +125,19 @@ public class MazeRenderer : MonoBehaviour {
 
         private MazeRenderer _parentRenderer;
         private Coroutine _transition;
-        private bool _isLit;
 
         private Material _offMat;
         private Material _onMat;
 
         private MeshRenderer _renderer;
-        private Light _light;
-
-        private float _activeLightRange;
 
         public NormalCell(MazeRenderer parentRenderer, GameObject prefab, Vector3 position, Transform parent, Material offMat, Material onMat) {
             GameObject cell = Instantiate(prefab, parent);
             cell.transform.localPosition = position;
             _renderer = cell.GetComponent<MeshRenderer>();
-            _light = cell.GetComponentInChildren<Light>();
-            _light.intensity = 0;
             _offMat = new Material(offMat);
             _onMat = new Material(onMat);
             _parentRenderer = parentRenderer;
-            _light.range = parentRenderer.transform.lossyScale.x / _initialLightScale * _lightRange;
         }
 
         public void SetLightState(bool setToLit) {
@@ -163,46 +153,31 @@ public class MazeRenderer : MonoBehaviour {
         }
 
         private IEnumerator TransitionToColour(Color newColour) {
-            return TransitionToColour(newColour, newColour);
-        }
-
-        private IEnumerator TransitionToColour(Color newColour, Color newCellMatColour) {
-            float oldIntensity = _light.intensity;
-            float newIntensity = _lightIntensity;
-            Color oldColour = _isLit ? _light.color : newColour;
-            Color oldMatColour = _renderer.material.color;
+            Color oldColour = _renderer.material.color;
             float elapsedTime = 0;
 
-            _isLit = true;
-
+            _renderer.material = _onMat;
             while (elapsedTime < _transitionTime) {
                 elapsedTime += Time.deltaTime;
-                _light.intensity = Mathf.Lerp(oldIntensity, newIntensity, elapsedTime / _transitionTime);
-                _light.color = Color.Lerp(oldColour, newColour, elapsedTime / _transitionTime);
-                _renderer.material.color = Color.Lerp(oldMatColour, newCellMatColour, elapsedTime / _transitionTime);
+                _renderer.material.color = Color.Lerp(oldColour, newColour, elapsedTime / _transitionTime);
                 yield return null;
             }
-            _light.intensity = newIntensity;
-            _light.color = newColour;
-            _onMat.color = newCellMatColour;
-
-            _renderer.material = _onMat;
+            _onMat.color = newColour;
         }
 
         private IEnumerator TransitionToOff() {
-            float oldIntensity = _light.intensity;
+            Color oldMatColour = _renderer.material.color;
             float elapsedTime = 0;
 
             yield return null;
-            _isLit = false;
             _renderer.material = _offMat;
 
             while (elapsedTime < _transitionTime) {
                 elapsedTime += Time.deltaTime;
-                _light.intensity = Mathf.Lerp(oldIntensity, 0, elapsedTime / _transitionTime);
+                _renderer.material.color = Color.Lerp(oldMatColour, _offMat.color, elapsedTime / _transitionTime);
                 yield return null;
             }
-            _light.intensity = 0;
+            _renderer.material = _offMat;
         }
     }
 
@@ -214,15 +189,12 @@ public class MazeRenderer : MonoBehaviour {
         private static readonly Color _goalBlue = new Color(0, 0.79f, 1);
 
         private MeshRenderer _renderer;
-        private Light _light;
 
         public GoalCell(MazeRenderer parentRenderer, GameObject prefab, Vector3 position, Transform parent) {
             GameObject cell = Instantiate(prefab, parent);
             cell.transform.localPosition = position;
             _renderer = cell.GetComponent<MeshRenderer>();
-            _light = cell.GetComponentInChildren<Light>();
             _parentRenderer = parentRenderer;
-            _light.range = parentRenderer.transform.lossyScale.x / _initialLightScale * _lightRange;
         }
 
         // Setting the light state to false on the goal cell actually makes it blue (unoccupied).
@@ -234,17 +206,14 @@ public class MazeRenderer : MonoBehaviour {
         }
 
         private IEnumerator Transition(Color newColour) {
-            Color oldColour = _light.color;
+            Color oldColour = _renderer.material.color;
             float elapsedTime = 0;
 
             while (elapsedTime < _transitionTime) {
                 elapsedTime += Time.deltaTime;
-                Color currentColor = Color.Lerp(oldColour, newColour, elapsedTime / _transitionTime);
-                _light.color = currentColor;
-                _renderer.material.color = currentColor;
+                _renderer.material.color = Color.Lerp(oldColour, newColour, elapsedTime / _transitionTime);
                 yield return null;
             }
-            _light.color = newColour;
             _renderer.material.color = newColour;
         }
     }
