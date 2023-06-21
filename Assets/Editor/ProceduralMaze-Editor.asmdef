@@ -1,0 +1,10 @@
+{
+  "name": "ProceduralMaze-Editor",
+  "references": [
+    "ProceduralMaze"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": []
+}
