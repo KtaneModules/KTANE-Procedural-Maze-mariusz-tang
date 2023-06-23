@@ -71,7 +71,9 @@ public class MazeRenderer : MonoBehaviour {
                 }
                 else {
                     _cells[i, j] = new NormalCell(this, _cell, position, _grid.transform, _cellOffMat, _cellOnMat);
-                    _cells[i, j].SetLightState(i == start.x && j == start.y);
+                    if (i == start.x && j == start.y) {
+                        _cells[i, j].SetLightState(Color.white);
+                    }
                 }
 
                 GameObject newRing = Instantiate(_ring, _grid.transform);
@@ -90,8 +92,8 @@ public class MazeRenderer : MonoBehaviour {
     }
 
     public void RenderMovementTo(Vector2Int position) {
-        _cells[position.x, position.y].SetLightState(true);
-        _cells[_currentRenderedPosition.x, _currentRenderedPosition.y].SetLightState(false);
+        _cells[position.x, position.y].SetLightState(Color.white);
+        _cells[_currentRenderedPosition.x, _currentRenderedPosition.y].SetDefaultColour();
         _currentRenderedPosition = position;
     }
 
@@ -117,8 +119,44 @@ public class MazeRenderer : MonoBehaviour {
         }
     }
 
+    public IEnumerator FlashAnimation(int[] lightPositions, Color colour, float time, int count = 1) {
+        var waitInterval = new WaitForSeconds(time / lightPositions.Length);
+        for (int i = 0; i < count; i++) {
+            foreach (int light in lightPositions) {
+                StartCoroutine(FlashLight(_cells[light % 6, light / 6], colour));
+                yield return waitInterval;
+            }
+            yield return new WaitForSeconds(2 * _transitionTime - time);
+        }
+    }
+
+    public IEnumerator FlashAnimation(int[][] lightPositionGroups, Color colour, float time, int count = 1) {
+        var waitInterval = new WaitForSeconds(time / lightPositionGroups.Length);
+        for (int i = 0; i < count; i++) {
+            foreach (int[] lights in lightPositionGroups) {
+                foreach (int light in lights) {
+                    StartCoroutine(FlashLight(_cells[light % 6, light / 6], colour));
+                }
+                yield return waitInterval;
+            }
+            yield return new WaitForSeconds(2 * _transitionTime - time);
+        }
+    }
+
+    private IEnumerator FlashLight(IMazeCell cell, Color colour) {
+        cell.SetLightState(colour);
+        yield return new WaitForSeconds(_transitionTime);
+        if (cell == _cells[_currentRenderedPosition.x, _currentRenderedPosition.y]) {
+            cell.SetLightState(Color.white);
+        }
+        else {
+            cell.SetDefaultColour();
+        }
+    }
+
     private interface IMazeCell {
-        void SetLightState(bool setToLit);
+        void SetLightState(Color colour);
+        void SetDefaultColour();
     }
 
     private class NormalCell : IMazeCell {
@@ -140,16 +178,18 @@ public class MazeRenderer : MonoBehaviour {
             _parentRenderer = parentRenderer;
         }
 
-        public void SetLightState(bool setToLit) {
+        public void SetDefaultColour() {
             if (_transition != null) {
                 _parentRenderer.StopCoroutine(_transition);
             }
-            if (setToLit) {
-                _transition = _parentRenderer.StartCoroutine(TransitionToColour(Color.white));
+            _transition = _parentRenderer.StartCoroutine(TransitionToOff());
+        }
+
+        public void SetLightState(Color colour) {
+            if (_transition != null) {
+                _parentRenderer.StopCoroutine(_transition);
             }
-            else {
-                _transition = _parentRenderer.StartCoroutine(TransitionToOff());
-            }
+            _transition = _parentRenderer.StartCoroutine(TransitionToColour(colour));
         }
 
         private IEnumerator TransitionToColour(Color newColour) {
@@ -197,12 +237,16 @@ public class MazeRenderer : MonoBehaviour {
             _parentRenderer = parentRenderer;
         }
 
+        public void SetDefaultColour() {
+            SetLightState(_goalBlue);
+        }
+
         // Setting the light state to false on the goal cell actually makes it blue (unoccupied).
-        public void SetLightState(bool setToLit) {
+        public void SetLightState(Color colour) {
             if (_transition != null) {
                 _parentRenderer.StopCoroutine(_transition);
             }
-            _transition = _parentRenderer.StartCoroutine(Transition(setToLit ? Color.white : _goalBlue));
+            _transition = _parentRenderer.StartCoroutine(Transition(colour));
         }
 
         private IEnumerator Transition(Color newColour) {

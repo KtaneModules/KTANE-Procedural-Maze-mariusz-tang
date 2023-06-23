@@ -33,7 +33,7 @@ public class ProceduralMazeModule : MonoBehaviour {
             arrow.Selectable.OnInteract += delegate () { HandlePress(arrow); return false; };
         }
 
-        _module.OnActivate += () => { StartCoroutine(LoadMaze()); _mazeRenderer.AssignMaze(_mazeHandler.Maze);  };
+        _module.OnActivate += () => { StartCoroutine(LoadMaze()); _mazeRenderer.AssignMaze(_mazeHandler.Maze); };
     }
 
     private IEnumerator LoadMaze() {
@@ -66,6 +66,7 @@ public class ProceduralMazeModule : MonoBehaviour {
         if (_mazeHandler.TryMove(arrow.Direction)) {
             _mazeRenderer.RenderMovementTo(_mazeHandler.CurrentPosition);
             _mazeRenderer.RenderWalls();
+            StartCoroutine(_mazeRenderer.FlashAnimation(AnimationData.RandomSingle, Color.green, 0.4f, 3));
         }
         else {
             Log("breh");
