@@ -57,7 +57,6 @@ public class MazeRenderer : MonoBehaviour {
     public void AssignMaze(BitMaze6x6 maze) {
         _maze = maze;
         RenderCellsAndGenerateRings(maze.StartCell.Position, maze.GoalCell.Position);
-        RenderRings();
         _currentRenderedPosition = maze.StartCell.Position;
     }
 
@@ -83,10 +82,22 @@ public class MazeRenderer : MonoBehaviour {
         }
     }
 
-    public void RenderRings() {
+    public IEnumerator ShowRings() {
+        var interval = new WaitForSeconds(0.005f);
         for (int col = 0; col < 6; col++) {
             for (int row = 0; row < 6; row++) {
                 _ringRenderers[col, row].enabled = _maze.Cells[col, row].Bit == 1;
+                yield return interval;
+            }
+        }
+    }
+
+    public IEnumerator HideRings() {
+        var interval = new WaitForSeconds(0.005f);
+        for (int col = 0; col < 6; col++) {
+            for (int row = 0; row < 6; row++) {
+                _ringRenderers[col, row].enabled = false;
+                yield return interval;
             }
         }
     }
@@ -97,24 +108,27 @@ public class MazeRenderer : MonoBehaviour {
         _currentRenderedPosition = position;
     }
 
-    public void RenderWalls() {
+    public IEnumerator ShowWalls() {
+        var interval = new WaitForSeconds(0.005f);
         for (int line = 0; line < 6; line++) {
             for (int wall = 0; wall < 7; wall++) {
                 BitMaze6x6.Wall colWall = _maze.ColumnWalls[line, wall];
-                if (colWall.IsDecided && colWall.IsPresent) {
-                    _columnWallRenderers[line, wall].enabled = true;
-                }
-                else {
-                    _columnWallRenderers[line, wall].enabled = false;
-                }
+                _columnWallRenderers[line, wall].enabled = colWall.IsDecided && colWall.IsPresent;
 
                 BitMaze6x6.Wall rowWall = _maze.RowWalls[line, wall];
-                if (rowWall.IsDecided && rowWall.IsPresent) {
-                    _rowWallRenderers[line, wall].enabled = true;
-                }
-                else {
-                    _rowWallRenderers[line, wall].enabled = false;
-                }
+                _rowWallRenderers[line, wall].enabled = rowWall.IsDecided && rowWall.IsPresent;
+                yield return interval;
+            }
+        }
+    }
+
+    public IEnumerator HideWalls() {
+        var interval = new WaitForSeconds(0.005f);
+        for (int line = 0; line < 6; line++) {
+            for (int wall = 0; wall < 7; wall++) {
+                _columnWallRenderers[line, wall].enabled = false;
+                _rowWallRenderers[line, wall].enabled = false;
+                yield return interval;
             }
         }
     }
@@ -152,6 +166,20 @@ public class MazeRenderer : MonoBehaviour {
         else {
             cell.SetDefaultColour();
         }
+    }
+
+    public void ShowHoldProgress(int level) {
+        for (int row = 0; row < 6; row++) {
+            for (int col = 0; col < 6; col++) {
+                if (row + col < level) {
+                    _cells[col, row].SetLightState(Color.white);
+                }
+                else {
+                    _cells[col, row].SetDefaultColour();
+                }
+            }
+        }
+        _cells[_currentRenderedPosition.x, _currentRenderedPosition.y].SetLightState(Color.white);
     }
 
     private interface IMazeCell {

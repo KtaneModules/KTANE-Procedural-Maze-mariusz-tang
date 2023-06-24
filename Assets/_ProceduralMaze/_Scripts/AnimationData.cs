@@ -42,5 +42,13 @@ public static class AnimationData {
         new int[] { 1, 2, 11, 17, 18, 24, 33, 34 },
     };
 
-    public static int[] RandomSingle => Enumerable.Range(0, 36).OrderBy(i => UnityEngine.Random.Range(0, 1f)).ToArray();
+    public static int[] GetRandomSingle() => Enumerable.Range(0, 36).OrderBy(i => UnityEngine.Random.Range(0, 1f)).ToArray();
+
+    public static int[] GetRandom(int repeats) {
+        var sequence = new List<int>();
+        for (int i = 0; i < repeats; i++) {
+            sequence.AddRange(GetRandomSingle().ToList());
+        }
+        return sequence.ToArray();
+    }
 }
