@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using UnityEngine;
 
@@ -20,7 +21,7 @@ public class ProceduralMazeModule : MonoBehaviour {
     private int _moduleId;
     private bool _isSolved = false;
 
-    private bool _loadingMaze;
+    private bool _isLoadingMaze;
 
     private Coroutine _holdTracker;
     private bool _trackingHold = false;
@@ -34,8 +35,6 @@ public class ProceduralMazeModule : MonoBehaviour {
         _arrows = GetComponent<KMSelectable>().Children.Select(c => c.GetComponent<ArrowButton>()).ToArray();
         _mazeHandler = new MazeHandler();
         _mazeRenderer = GetComponentInChildren<MazeRenderer>();
-
-        Log("To read the example solutions, follow the directions reaching a coordinate, then go to that coordinate without visiting any new cells, then continue following the directions, and so on.");
     }
 
     private void Start() {
@@ -49,24 +48,29 @@ public class ProceduralMazeModule : MonoBehaviour {
     }
 
     private IEnumerator LoadMaze() {
-        _loadingMaze = true;
+        _isLoadingMaze = true;
         _mazeHandler.IsReady = false;
 
+        Log("Generating maze.");
         _mazeRenderer.RenderMovementTo(_mazeHandler.Maze.StartCell.Position);
         StartCoroutine(_mazeRenderer.HideRings());
+
         // Adapted from Obvi's Raster Prime source code.
         yield return new WaitForSecondsRealtime(UnityEngine.Random.Range(0, 0.5f));
         do {
             yield return StartCoroutine(_mazeRenderer.FlashAnimation(AnimationData.GetRandomSingle(), new Color(1, 0.5f, 1), 0.5f));
         } while (_usingExtraThread);
+
         // Thread start
         _usingExtraThread = true;
         string solution;
+
         var thread = new Thread(() => {
             do {
                 _mazeHandler.ResetMaze();
             } while (!MazeSolver.TrySolve(_mazeHandler, out solution));
-            Log($"One possible solution is {solution}");
+            _mazeHandler.Solution = solution;
+            _mazeHandler.HasMoved = false;
         });
         thread.Start();
 
@@ -80,15 +84,16 @@ public class ProceduralMazeModule : MonoBehaviour {
         _usingExtraThread = false;
         _audio.PlaySoundAtTransform("MazeGeneration", transform);
         StartCoroutine(_mazeRenderer.ShowRings());
+        Log($"One possible solution is {_mazeHandler.Solution}.");
         while (count < 2) {
             yield return StartCoroutine(_mazeRenderer.FlashAnimation(AnimationData.GetRandomSingle(), new Color(1, 0.5f, 1), 0.5f));
             count++;
         }
-        _loadingMaze = false;
+        _isLoadingMaze = false;
     }
 
     private IEnumerator HandleHold() {
-        if (_loadingMaze || _isSolved) {
+        if (_isLoadingMaze || _isSolved) {
             yield break;
         }
         _holdSound = _audio.PlaySoundAtTransformWithRef("ButtonHold", transform);
@@ -130,6 +135,7 @@ public class ProceduralMazeModule : MonoBehaviour {
 
     private void HandleMovePress(ArrowButton arrow) {
         if (_mazeHandler.TryMove(arrow.Direction)) {
+            _mazeHandler.HasMoved = true;
             _mazeRenderer.RenderMovementTo(_mazeHandler.CurrentPosition);
             if (_mazeHandler.CurrentPosition == _mazeHandler.Maze.GoalCell.Position) {
                 Solve();
@@ -145,7 +151,7 @@ public class ProceduralMazeModule : MonoBehaviour {
     }
 
     private void Strike(string message) {
-        _loadingMaze = true;
+        _isLoadingMaze = true;
         Log(message);
         _module.HandleStrike();
         StartCoroutine(StrikeAnimation());
@@ -177,6 +183,67 @@ public class ProceduralMazeModule : MonoBehaviour {
         while (true) {
             yield return StartCoroutine(_mazeRenderer.ShowWalls());
             yield return StartCoroutine(_mazeRenderer.HideWalls());
+        }
+    }
+
+#pragma warning disable 414
+    private readonly string TwitchHelpMessage = @"Use '!{0} press UDLR' to press up, down, left, then right; chain with or without spaces | '!{0} <regenerate/hold>' to regenerate the maze.";
+#pragma warning restore 414
+
+    private WaitForSeconds _tpPressInterval = new WaitForSeconds(0.05f);
+
+    private IEnumerator ProcessTwitchCommand(string command) {
+        command = command.Trim().ToUpperInvariant();
+
+        if (_isLoadingMaze) {
+            yield return "sendtochaterror Are you trying to intentionally cause a strike? Wait for the maze to generate before inputting commands!";
+        }
+
+        Match match = Regex.Match(command, @"^press\s+([UDLR][UDLR ]*)$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+        if (match.Success) {
+            int presses = 0;
+
+            yield return null;
+            foreach (char direction in match.Groups[1].Value) {
+                if (direction != ' ') {
+                    yield return $"trycancel The press command was cancelled after {presses} {(presses == 1 ? "press" : "presses")}.";
+                    yield return Press(direction);
+                    presses += 1;
+                }
+            }
+            yield break;
+        }
+        match = Regex.Match(command, @"^regenerate|hold$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+        if (match.Success) {
+            yield return null;
+            _arrows[0].Selectable.OnInteract();
+            yield return new WaitForSeconds(3.1f);
+            _arrows[0].Selectable.OnInteractEnded();
+            yield break;
+        }
+
+        yield return "sendtochaterror Invalid command!";
+    }
+
+    private IEnumerator Press(char direction) {
+        _arrows["ULDR".IndexOf(direction)].Selectable.OnInteract();
+        yield return _tpPressInterval;
+        _arrows["ULDR".IndexOf(direction)].Selectable.OnInteractEnded();
+        yield return _tpPressInterval;
+    }
+
+    private IEnumerator TwitchHandleForcedSolve() {
+        if (_mazeHandler.HasMoved) {
+            yield return PauseAutosolverWhile(() => _isLoadingMaze);
+            yield return ProcessTwitchCommand("regenerate");
+        }
+        yield return PauseAutosolverWhile(() => _isLoadingMaze);
+        yield return ProcessTwitchCommand($"press {_mazeHandler.Solution}");
+    }
+
+    private IEnumerator PauseAutosolverWhile(Func<bool> predicate) {
+        while (predicate()) {
+            yield return true;
         }
     }
 }

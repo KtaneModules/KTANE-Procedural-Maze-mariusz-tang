@@ -35,6 +35,9 @@ public class MazeHandler {
     }
     public IEnumerable<BitMaze6x6.Cell> VisitedCells { get { return _visitedCells.ToArray().Distinct(); } }
 
+    public string Solution { get; set; }
+    public bool HasMoved { get; set; }
+
     public bool HasVisited(BitMaze6x6.Cell cell) => _visitedCells.Contains(cell);
 
     public bool TryMove(MazeDirection direction) {

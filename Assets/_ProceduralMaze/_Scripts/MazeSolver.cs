@@ -108,9 +108,8 @@ public static class MazeSolver {
 
         while (_traverser.VisitedCells.Count() > _initialVisitedSquaresCount) {
             _traverser.UndoMove();
-            _traverser.UndoMove();
         }
-
+        Debug.Log($"{_traverser.CurrentPosition.x} {_traverser.CurrentPosition.y}");
         return moveString;
     }
 

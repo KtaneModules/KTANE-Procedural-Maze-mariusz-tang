@@ -19,6 +19,7 @@ public class ArrowButton : MonoBehaviour {
         Selectable.OnInteract += () => {
             _animator.SetBool("IsPressed", true);
             _audio.PlaySoundAtTransform("ButtonPress", transform);
+            Debug.Log($"Press {Direction}.");
             return true;
         };
         Selectable.OnInteractEnded += () => {
