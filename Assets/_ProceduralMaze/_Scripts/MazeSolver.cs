@@ -2,16 +2,26 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using UnityEngine;
 
 public static class MazeSolver {
 
     private static readonly IEnumerable<MazeDirection> _directions = Enumerable.Range(0, 4).Select(i => (MazeDirection)i);
     private static MazeHandler _traverser;
+    private static int _initialVisitedSquaresCount;
+
+    private static Dictionary<MazeDirection, string> _directionOppositeLetters = new Dictionary<MazeDirection, string> {
+        {MazeDirection.Up, "D"},
+        {MazeDirection.Down, "U"},
+        {MazeDirection.Left, "R"},
+        {MazeDirection.Right, "L"},
+    };
 
     public static bool TrySolve(MazeHandler traverser, out string solution) {
         _traverser = traverser;
         solution = string.Empty;
+        _initialVisitedSquaresCount = _traverser.VisitedCells.Count();
 
         Stack<List<RevealMove>> moveTree = new Stack<List<RevealMove>>();
         Stack<RevealMove> currentPath = new Stack<RevealMove>();
@@ -80,26 +90,64 @@ public static class MazeSolver {
     }
 
     private static string GetSolutionString(Stack<RevealMove> path) {
-        RevealMove move = path.Pop();
-        RevealMove previousMove = new RevealMove(move.FromCell, move.Direction);
-        string solution = $"{move.Direction.ToString()[0]}";
-        _traverser.UndoMove();
-        _traverser.UndoMove();
+        var moves = new Stack<RevealMove>();
+        var moveString = string.Empty;
 
         while (path.Any()) {
-            move = path.Pop();
-            if (move.ToCell == previousMove.FromCell) {
-                solution = $"{move.Direction.ToString()[0]}{solution}";
-            }
-            else {
-                solution = $"{move.Direction.ToString()[0]} | {"ABCDEF"[previousMove.FromCell.Position.x]}{previousMove.FromCell.Position.y + 1} {solution}";
-            }
+            moves.Push(path.Pop());
             _traverser.UndoMove();
             _traverser.UndoMove();
-            previousMove = new RevealMove(move.FromCell, move.Direction);
         }
 
-        return solution;
+        while (moves.Any()) {
+            RevealMove move = moves.Pop();
+            moveString += PathfindToCell(move.FromCell);
+            moveString += "URDL"[(int)move.Direction];
+            _traverser.TryMove(move.Direction);
+        }
+
+        while (_traverser.VisitedCells.Count() > _initialVisitedSquaresCount) {
+            _traverser.UndoMove();
+            _traverser.UndoMove();
+        }
+
+        return moveString;
+    }
+
+    private static string PathfindToCell(BitMaze6x6.Cell cell) {
+        var moves = string.Empty;
+        if (_traverser.CurrentPosition == cell.Position) {
+            return moves;
+        }
+
+        var currentDepth = new List<BitMaze6x6.Cell> { cell };
+        var moveTreeFromGoal = new Dictionary<BitMaze6x6.Cell, MazeDirection>();
+        BitMaze6x6.Cell startCell = _traverser.Maze.Cells[_traverser.CurrentPosition.x, _traverser.CurrentPosition.y];
+
+        while (!moveTreeFromGoal.ContainsKey(startCell)) {
+            var newDepth = new List<BitMaze6x6.Cell>();
+            foreach (BitMaze6x6.Cell c in currentDepth) {
+                for (int i = 0; i < 4; i++) {
+                    var direction = (MazeDirection)i;
+                    BitMaze6x6.Wall currentWall = c.GetAdjacentWall(direction);
+                    if (currentWall.IsDecided && !currentWall.IsPresent) {
+                        BitMaze6x6.Cell currentNeighbour = c.GetNeighbour(direction);
+                        if (_traverser.HasVisited(currentNeighbour) && !moveTreeFromGoal.ContainsKey(currentNeighbour)) {
+                            moveTreeFromGoal.Add(currentNeighbour, direction);
+                            newDepth.Add(currentNeighbour);
+                        }
+                    }
+                }
+            }
+            currentDepth = newDepth.ToList();
+        }
+
+        while (_traverser.CurrentPosition != cell.Position) {
+            MazeDirection direction = moveTreeFromGoal[_traverser.Maze.Cells[_traverser.CurrentPosition.x, _traverser.CurrentPosition.y]];
+            _traverser.TryMove((MazeDirection)(((int)direction + 2) % 4));
+            moves += _directionOppositeLetters[direction];
+        }
+        return moves;
     }
 
     public class RevealMove {

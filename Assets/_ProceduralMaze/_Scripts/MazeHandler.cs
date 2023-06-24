@@ -48,6 +48,7 @@ public class MazeHandler {
         _moveHistory.Push(new Movement(_currentCell, decidedWalls, oldSeed));
         _currentCell = newCell;
         _visitedCells.Push(_currentCell);
+
         return true;
     }
 

@@ -18,6 +18,7 @@ public class ProceduralMazeModule : MonoBehaviour {
     private static bool _usingExtraThread;
     private static int _moduleCount;
     private int _moduleId;
+    private bool _isSolved = false;
 
     private bool _loadingMaze;
 
@@ -39,7 +40,7 @@ public class ProceduralMazeModule : MonoBehaviour {
 
     private void Start() {
         foreach (ArrowButton arrow in _arrows) {
-            arrow.Selectable.OnInteract += () => { _holdTracker = StartCoroutine(HandleHold(arrow)); return false; };
+            arrow.Selectable.OnInteract += () => { _holdTracker = StartCoroutine(HandleHold()); return false; };
             arrow.Selectable.OnInteractEnded += () => { HandleRelease(arrow); };
         }
 
@@ -74,6 +75,7 @@ public class ProceduralMazeModule : MonoBehaviour {
             yield return StartCoroutine(_mazeRenderer.FlashAnimation(AnimationData.GetRandomSingle(), new Color(1, 0.5f, 1), 0.5f));
             count++;
         }
+
         // Thread finish
         _usingExtraThread = false;
         _audio.PlaySoundAtTransform("MazeGeneration", transform);
@@ -85,8 +87,8 @@ public class ProceduralMazeModule : MonoBehaviour {
         _loadingMaze = false;
     }
 
-    private IEnumerator HandleHold(ArrowButton arrow) {
-        if (_loadingMaze) {
+    private IEnumerator HandleHold() {
+        if (_loadingMaze || _isSolved) {
             yield break;
         }
         _holdSound = _audio.PlaySoundAtTransformWithRef("ButtonHold", transform);
@@ -143,7 +145,7 @@ public class ProceduralMazeModule : MonoBehaviour {
     }
 
     private void Strike(string message) {
-        _mazeHandler.IsReady = false;
+        _loadingMaze = true;
         Log(message);
         _module.HandleStrike();
         StartCoroutine(StrikeAnimation());
@@ -160,7 +162,7 @@ public class ProceduralMazeModule : MonoBehaviour {
     }
 
     private void Solve() {
-        _mazeHandler.IsReady = false;
+        _isSolved = true;
         _module.HandlePass();
         PlaySolveAnimation();
     }
@@ -168,10 +170,10 @@ public class ProceduralMazeModule : MonoBehaviour {
     private void PlaySolveAnimation() {
         _audio.PlaySoundAtTransform("Solve", transform);
         StartCoroutine(_mazeRenderer.FlashAnimation(AnimationData.SpiralOut, Color.green, 0.5f));
-        StartCoroutine(WallsFlash());
+        StartCoroutine(FlashWalls());
     }
 
-    private IEnumerator WallsFlash() {
+    private IEnumerator FlashWalls() {
         while (true) {
             yield return StartCoroutine(_mazeRenderer.ShowWalls());
             yield return StartCoroutine(_mazeRenderer.HideWalls());
