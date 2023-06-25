@@ -63,14 +63,14 @@ public class ProceduralMazeModule : MonoBehaviour {
 
         // Thread start
         _usingExtraThread = true;
-        string solution;
 
         var thread = new Thread(() => {
+            string solution;
             do {
                 _mazeHandler.ResetMaze();
             } while (!MazeSolver.TrySolve(_mazeHandler, out solution));
             _mazeHandler.Solution = solution;
-            _mazeHandler.HasMoved = false;
+            // _mazeHandler.HasMoved = false;
         });
         thread.Start();
 
@@ -79,9 +79,9 @@ public class ProceduralMazeModule : MonoBehaviour {
             yield return StartCoroutine(_mazeRenderer.FlashAnimation(AnimationData.GetRandomSingle(), new Color(1, 0.5f, 1), 0.5f));
             count++;
         }
-
-        // Thread finish
         _usingExtraThread = false;
+        // Thread finish
+
         _audio.PlaySoundAtTransform("MazeGeneration", transform);
         StartCoroutine(_mazeRenderer.ShowRings());
         Log($"One possible solution is {_mazeHandler.Solution}.");
@@ -135,7 +135,7 @@ public class ProceduralMazeModule : MonoBehaviour {
 
     private void HandleMovePress(ArrowButton arrow) {
         if (_mazeHandler.TryMove(arrow.Direction)) {
-            _mazeHandler.HasMoved = true;
+            // _mazeHandler.HasMoved = true;
             _mazeRenderer.RenderMovementTo(_mazeHandler.CurrentPosition);
             if (_mazeHandler.CurrentPosition == _mazeHandler.Maze.GoalCell.Position) {
                 Solve();
@@ -233,17 +233,33 @@ public class ProceduralMazeModule : MonoBehaviour {
     }
 
     private IEnumerator TwitchHandleForcedSolve() {
-        if (_mazeHandler.HasMoved) {
-            yield return PauseAutosolverWhile(() => _isLoadingMaze);
-            yield return ProcessTwitchCommand("regenerate");
-        }
-        yield return PauseAutosolverWhile(() => _isLoadingMaze);
-        yield return ProcessTwitchCommand($"press {_mazeHandler.Solution}");
-    }
-
-    private IEnumerator PauseAutosolverWhile(Func<bool> predicate) {
-        while (predicate()) {
+        while (_usingExtraThread) {
             yield return true;
         }
+
+        // Thread start
+        _usingExtraThread = true;
+        _mazeHandler.Solution = "breh";
+
+        var thread = new Thread(() => {
+            string solution;
+            MazeSolver.TrySolve(_mazeHandler, out solution);
+            _mazeHandler.Solution = solution;
+        });
+        thread.Start();
+
+        while (_mazeHandler.Solution == "breh") {
+            yield return true;
+        }
+        _usingExtraThread = false;
+        // Thread finish
+
+        if (_mazeHandler.Solution == string.Empty) {
+            yield return ProcessTwitchCommand("regenerate");
+            while (_isLoadingMaze) {
+                yield return true;
+            }
+        }
+        yield return ProcessTwitchCommand($"press {_mazeHandler.Solution}");
     }
 }

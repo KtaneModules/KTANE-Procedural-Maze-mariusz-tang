@@ -33,10 +33,9 @@ public class MazeHandler {
         get { return _currentCell.Position; }
         set { _currentCell = Maze.Cells[value.x, value.y]; }
     }
-    public IEnumerable<BitMaze6x6.Cell> VisitedCells { get { return _visitedCells.ToArray().Distinct(); } }
+    public IEnumerable<BitMaze6x6.Cell> VisitedCells { get { return _visitedCells.ToArray(); } }
 
     public string Solution { get; set; }
-    public bool HasMoved { get; set; }
 
     public bool HasVisited(BitMaze6x6.Cell cell) => _visitedCells.Contains(cell);
 
