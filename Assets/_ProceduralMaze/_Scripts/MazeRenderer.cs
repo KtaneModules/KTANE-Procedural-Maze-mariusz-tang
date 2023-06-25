@@ -103,7 +103,7 @@ public class MazeRenderer : MonoBehaviour {
     }
 
     public void RenderMovementTo(Vector2Int position) {
-        _cells[position.x, position.y].SetLightState(Color.white);
+        _cells[position.x, position.y].SetOccupiedColour();
         _cells[_currentRenderedPosition.x, _currentRenderedPosition.y].SetDefaultColour();
         _currentRenderedPosition = position;
     }
@@ -161,7 +161,7 @@ public class MazeRenderer : MonoBehaviour {
         cell.SetLightState(colour);
         yield return new WaitForSeconds(_transitionTime);
         if (cell == _cells[_currentRenderedPosition.x, _currentRenderedPosition.y]) {
-            cell.SetLightState(Color.white);
+            cell.SetOccupiedColour();
         }
         else {
             cell.SetDefaultColour();
@@ -172,7 +172,7 @@ public class MazeRenderer : MonoBehaviour {
         for (int row = 0; row < 6; row++) {
             for (int col = 0; col < 6; col++) {
                 if (row + col < level) {
-                    _cells[col, row].SetLightState(Color.white);
+                    _cells[col, row].SetLightState(Color.white * 0.75f);
                 }
                 else {
                     _cells[col, row].SetDefaultColour();
@@ -185,6 +185,7 @@ public class MazeRenderer : MonoBehaviour {
     private interface IMazeCell {
         void SetLightState(Color colour);
         void SetDefaultColour();
+        void SetOccupiedColour();
     }
 
     private class NormalCell : IMazeCell {
@@ -211,6 +212,10 @@ public class MazeRenderer : MonoBehaviour {
                 _parentRenderer.StopCoroutine(_transition);
             }
             _transition = _parentRenderer.StartCoroutine(TransitionToOff());
+        }
+
+        public void SetOccupiedColour() {
+            SetLightState(Color.white);
         }
 
         public void SetLightState(Color colour) {
@@ -267,6 +272,10 @@ public class MazeRenderer : MonoBehaviour {
 
         public void SetDefaultColour() {
             SetLightState(_goalBlue);
+        }
+
+        public void SetOccupiedColour() {
+            SetLightState(Color.green);
         }
 
         // Setting the light state to false on the goal cell actually makes it blue (unoccupied).

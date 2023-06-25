@@ -71,7 +71,6 @@ public class ProceduralMazeModule : MonoBehaviour {
                 _mazeHandler.ResetMaze();
             } while (!MazeSolver.TrySolve(_mazeHandler, out solution));
             _mazeHandler.Solution = solution;
-            // _mazeHandler.HasMoved = false;
         });
         thread.Start();
 
@@ -86,6 +85,7 @@ public class ProceduralMazeModule : MonoBehaviour {
         _audio.PlaySoundAtTransform("MazeGeneration", transform);
         StartCoroutine(_mazeRenderer.ShowRings());
         LogRings();
+        Log($"The initial seed is {_mazeHandler.CurrentSeed}.");
         Log($"One possible solution is {_mazeHandler.Solution}.");
         while (count < 2) {
             yield return StartCoroutine(_mazeRenderer.FlashAnimation(AnimationData.GetRandomSingle(), new Color(1, 0.5f, 1), 0.5f));

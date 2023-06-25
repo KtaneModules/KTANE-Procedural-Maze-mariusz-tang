@@ -39,6 +39,7 @@ public class MazeHandler {
     }
     public IEnumerable<BitMaze6x6.Cell> VisitedCells { get { return _visitedCells.ToArray(); } }
 
+    public string CurrentSeed { get { return _seed; } }
     public string Solution { get; set; }
 
     public bool HasVisited(BitMaze6x6.Cell cell) => _visitedCells.Contains(cell);
@@ -60,7 +61,7 @@ public class MazeHandler {
         if (shouldBeLogged) {
             string logging = $"Moved {direction.ToString().ToLower()} to {"ABCDEF"[_currentCell.Position.x]}{_currentCell.Position.y + 1}.";
             if (wallLogging != string.Empty) {
-                logging += $" Generated walls: {wallLogging}.";
+                logging += $" Generated walls: {wallLogging}. The seed is now {CurrentSeed}.";
             }
             _module.Log(logging);
         }
