@@ -39,25 +39,36 @@ public static class MazeGenerator {
         }
     }
 
-    public static BitMaze6x6.Wall[] DecideWallsAroundCell(BitMaze6x6 maze, BitMaze6x6.Cell cell, MazeDirection directionMoved, ref string seed) {
+    public static BitMaze6x6.Wall[] DecideWallsAroundCell(BitMaze6x6 maze, BitMaze6x6.Cell cell, MazeDirection directionMoved, ref string seed, out string logging) {
         // This is messy but we are getting the directions one and two clockwise from directionMoved.
         int[] bitmask = maze.GetBitLineInDirection(cell.Position, (MazeDirection)((int)(directionMoved + 1) % 4));
         MazeDirection fromDirection = (MazeDirection)(((int)directionMoved + 2) % 4);
-        BitMaze6x6.Wall[] walls = cell.GetAdjacentWallsClockFromDirection(fromDirection).Where(w => !w.IsDecided).ToArray();
+        
+        var walls = new List<BitMaze6x6.Wall>();
+        logging = string.Empty;
 
-        foreach (BitMaze6x6.Wall wall in walls) {
-            bool even = true;
+        for (int i = 0; i < 4; i++) {
+            MazeDirection direction = (MazeDirection)i;
+            BitMaze6x6.Wall wall = cell.GetAdjacentWall(direction);
+            if (!wall.IsDecided) {
+                bool even = true;
 
-            for (int pos = 0; pos < 6; pos++) {
-                if (seed[pos] == '1' && bitmask[pos] == 1) {
-                    even = !even;
+                for (int pos = 0; pos < 6; pos++) {
+                    if (seed[pos] == '1' && bitmask[pos] == 1) {
+                        even = !even;
+                    }
                 }
-            }
 
-            wall.IsPresent = even;
-            seed = seed.Insert(0, even ? "1" : "0").Remove(6, 1);
+                wall.IsPresent = even;
+                seed = seed.Insert(0, even ? "1" : "0").Remove(6, 1);
+                walls.Add(wall);
+                if (logging != string.Empty) {
+                    logging += " | ";
+                }
+                logging += $"{direction}: {(wall.IsPresent ? "present" : "absent")}";
+            }
         }
 
-        return walls;
+        return walls.ToArray();
     }
 }

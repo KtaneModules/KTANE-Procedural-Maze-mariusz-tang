@@ -37,7 +37,7 @@ public static class MazeSolver {
                 currentPath.Push(nextMove);
 
                 _traverser.Teleport(nextMove.FromCell);
-                _traverser.TryMove(nextMove.Direction);
+                _traverser.TryMove(nextMove.Direction, shouldBeLogged: false);
                 moveTree.Push(GetNextMoves());
 
                 if (_traverser.CurrentPosition == _traverser.Maze.GoalCell.Position) {
@@ -103,13 +103,12 @@ public static class MazeSolver {
             RevealMove move = moves.Pop();
             moveString += PathfindToCell(move.FromCell);
             moveString += "URDL"[(int)move.Direction];
-            _traverser.TryMove(move.Direction);
+            _traverser.TryMove(move.Direction, shouldBeLogged: false);
         }
 
         while (_traverser.VisitedCells.Count() > _initialVisitedSquaresCount) {
             _traverser.UndoMove();
         }
-        Debug.Log($"{_traverser.CurrentPosition.x} {_traverser.CurrentPosition.y}");
         return moveString;
     }
 
@@ -143,7 +142,7 @@ public static class MazeSolver {
 
         while (_traverser.CurrentPosition != cell.Position) {
             MazeDirection direction = moveTreeFromGoal[_traverser.Maze.Cells[_traverser.CurrentPosition.x, _traverser.CurrentPosition.y]];
-            _traverser.TryMove((MazeDirection)(((int)direction + 2) % 4));
+            _traverser.TryMove((MazeDirection)(((int)direction + 2) % 4), shouldBeLogged: false);
             moves += _directionOppositeLetters[direction];
         }
         return moves;

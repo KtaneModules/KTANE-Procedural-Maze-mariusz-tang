@@ -126,16 +126,6 @@ public class BitMaze6x6 {
         public Wall GetAdjacentWall(MazeDirection inDirection) => _walls[inDirection];
         public Wall[] GetAdjacentWalls() => _walls.Select(p => p.Value).ToArray();
 
-        public Wall[] GetAdjacentWallsClockFromDirection(MazeDirection direction) {
-            var walls = new Wall[4];
-
-            for (int d = 0; d < 4; d++) {
-                walls[d] = GetAdjacentWall((MazeDirection)(((int)direction + d) % 4));
-            }
-
-            return walls;
-        }
-
         public void AssignNeighbour(MazeDirection inDirection, Cell neighbour) => _neighbours.Add(inDirection, neighbour);
         public Cell GetNeighbour(MazeDirection inDirection) => _neighbours[inDirection];
     }

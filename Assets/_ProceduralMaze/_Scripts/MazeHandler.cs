@@ -14,13 +14,17 @@ public class MazeHandler {
         { MazeDirection.Left, Vector2Int.left },
     };
 
+    private ProceduralMazeModule _module;
+
     private BitMaze6x6.Cell _currentCell;
     private string _seed;
 
     private Stack<Movement> _moveHistory = new Stack<Movement>();
     private Stack<BitMaze6x6.Cell> _visitedCells = new Stack<BitMaze6x6.Cell>();
 
-    public MazeHandler() {
+    public MazeHandler(ProceduralMazeModule module) {
+        _module = module;
+
         Maze = MazeGenerator.GenerateNewMaze(out _seed);
         _currentCell = Maze.StartCell;
         _visitedCells.Push(_currentCell);
@@ -39,17 +43,27 @@ public class MazeHandler {
 
     public bool HasVisited(BitMaze6x6.Cell cell) => _visitedCells.Contains(cell);
 
-    public bool TryMove(MazeDirection direction) {
+    public bool TryMove(MazeDirection direction, bool shouldBeLogged = true) {
         if (_currentCell.GetAdjacentWall(direction).IsPresent) {
+            _module.Strike($"Tried to move {direction.ToString().ToLower()}, but there is a wall in that direction! Strike!");
             return false;
         }
 
         string oldSeed = _seed;
+        string wallLogging;
         BitMaze6x6.Cell newCell = _currentCell.GetNeighbour(direction);
-        BitMaze6x6.Wall[] decidedWalls = MazeGenerator.DecideWallsAroundCell(Maze, newCell, direction, ref _seed);
+        BitMaze6x6.Wall[] decidedWalls = MazeGenerator.DecideWallsAroundCell(Maze, newCell, direction, ref _seed, out wallLogging);
         _moveHistory.Push(new Movement(_currentCell, decidedWalls, oldSeed));
         _currentCell = newCell;
         _visitedCells.Push(_currentCell);
+
+        if (shouldBeLogged) {
+            string logging = $"Moved {direction.ToString().ToLower()} to {"ABCDEF"[_currentCell.Position.x]}{_currentCell.Position.y + 1}.";
+            if (wallLogging != string.Empty) {
+                logging += $" Generated walls: {wallLogging}.";
+            }
+            _module.Log(logging);
+        }
 
         return true;
     }
