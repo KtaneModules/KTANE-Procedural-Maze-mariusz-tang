@@ -1,9 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using UnityEngine;
 
 public static class MazeSolver {
 
@@ -66,7 +63,6 @@ public static class MazeSolver {
         foreach (BitMaze6x6.Cell cell in _traverser.VisitedCells) {
             foreach (MazeDirection direction in _directions) {
                 if (!cell.GetAdjacentWall(direction).IsPresent && !_traverser.HasVisited(cell.GetNeighbour(direction))) {
-                    RevealMove move = new RevealMove(cell, direction);
                     moves.Add(new RevealMove(cell, direction));
                 }
             }

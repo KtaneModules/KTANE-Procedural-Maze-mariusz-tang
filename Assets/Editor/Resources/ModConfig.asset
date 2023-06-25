@@ -14,7 +14,11 @@ MonoBehaviour:
   id: ProceduralMaze
   title: Procedural Maze
   author: Kuro
-  description: Yes
+  description: "No, this isn't a \"Not\" module. No, this isn't based on Generated
+    Maze.\n\nNavigate from one location to another in a 6\xD76 square maze, except
+    the maze layout depends on your movements.\n\nManual coming soon. (Temporarily
+    at https://drive.google.com/file/d/1NKaJuAriI9Ze6-E_brKXZ47wQqWDe6aD/view)\nManual
+    by ishanpm.\nReport bugs to ku.ro on Discord."
   version: 1
   outputFolder: build
-  previewImage: {fileID: 0}
+  previewImage: {fileID: 2800000, guid: 77a23996327d1794baee1e6ee53991d4, type: 3}

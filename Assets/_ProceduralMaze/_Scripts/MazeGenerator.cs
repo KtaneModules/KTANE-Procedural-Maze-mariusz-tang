@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -42,7 +40,6 @@ public static class MazeGenerator {
     public static BitMaze6x6.Wall[] DecideWallsAroundCell(BitMaze6x6 maze, BitMaze6x6.Cell cell, MazeDirection directionMoved, ref string seed, out string logging) {
         // This is messy but we are getting the directions one and two clockwise from directionMoved.
         int[] bitmask = maze.GetBitLineInDirection(cell.Position, (MazeDirection)((int)(directionMoved + 1) % 4));
-        MazeDirection fromDirection = (MazeDirection)(((int)directionMoved + 2) % 4);
         
         var walls = new List<BitMaze6x6.Wall>();
         logging = string.Empty;
