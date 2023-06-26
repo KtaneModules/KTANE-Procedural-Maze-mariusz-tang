@@ -44,8 +44,8 @@ public static class MazeGenerator {
         var walls = new List<BitMaze6x6.Wall>();
         logging = string.Empty;
 
-        for (int i = 0; i < 4; i++) {
-            MazeDirection direction = (MazeDirection)i;
+        for (int i = (int)directionMoved, j = 0; j < 4; j++) {
+            MazeDirection direction = (MazeDirection)((i + j)% 4);
             BitMaze6x6.Wall wall = cell.GetAdjacentWall(direction);
             if (!wall.IsDecided) {
                 bool even = true;

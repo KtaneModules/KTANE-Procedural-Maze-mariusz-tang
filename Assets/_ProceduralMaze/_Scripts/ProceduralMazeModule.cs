@@ -14,7 +14,7 @@ public class ProceduralMazeModule : MonoBehaviour {
     private MazeHandler _mazeHandler;
     private MazeRenderer _mazeRenderer;
 
-    private static bool _usingExtraThread;
+    private static bool _usingExtraThread = false;
     private static int _moduleCount;
     private int _moduleId;
     private bool _isSolved = false;
