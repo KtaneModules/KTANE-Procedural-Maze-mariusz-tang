@@ -40,12 +40,12 @@ public static class MazeGenerator {
     public static BitMaze6x6.Wall[] DecideWallsAroundCell(BitMaze6x6 maze, BitMaze6x6.Cell cell, MazeDirection directionMoved, ref string seed, out string logging) {
         // This is messy but we are getting the directions one and two clockwise from directionMoved.
         int[] bitmask = maze.GetBitLineInDirection(cell.Position, (MazeDirection)((int)(directionMoved + 1) % 4));
-        
+
         var walls = new List<BitMaze6x6.Wall>();
         logging = string.Empty;
 
-        for (int i = (int)directionMoved, j = 0; j < 4; j++) {
-            MazeDirection direction = (MazeDirection)((i + j)% 4);
+        for (int i = (int)directionMoved + 2, j = 0; j < 4; j++) {
+            MazeDirection direction = (MazeDirection)((i + j) % 4);
             BitMaze6x6.Wall wall = cell.GetAdjacentWall(direction);
             if (!wall.IsDecided) {
                 bool even = true;
