@@ -14,8 +14,8 @@ public class ProceduralMazeModule : MonoBehaviour {
     private MazeHandler _mazeHandler;
     private MazeRenderer _mazeRenderer;
 
-    private static bool _usingExtraThread = false;
-    private static int _moduleCount;
+    private static bool s_usingExtraThread = false;
+    private static int s_moduleCount;
     private int _moduleId;
     private bool _isSolved = false;
 
@@ -28,7 +28,7 @@ public class ProceduralMazeModule : MonoBehaviour {
     private KMAudio.KMAudioRef _holdSound;
 
     private void Awake() {
-        _moduleId = _moduleCount++;
+        _moduleId = s_moduleCount++;
 
         _audio = GetComponent<KMAudio>();
 
@@ -48,6 +48,8 @@ public class ProceduralMazeModule : MonoBehaviour {
         StartCoroutine(LoadMaze(isInitialGeneration: true));
     }
 
+    private void OnDestroy() => s_usingExtraThread = false;
+
     private IEnumerator LoadMaze(bool isInitialGeneration = false) {
         _isLoadingMaze = true;
         _mazeHandler.IsReady = false;
@@ -60,10 +62,10 @@ public class ProceduralMazeModule : MonoBehaviour {
         yield return new WaitForSecondsRealtime(UnityEngine.Random.Range(0, 0.5f));
         do {
             yield return StartCoroutine(_mazeRenderer.FlashAnimation(AnimationData.GetRandomSingle(), new Color(1, 0.5f, 1), 0.5f));
-        } while (_usingExtraThread);
+        } while (s_usingExtraThread);
 
         // Thread start
-        _usingExtraThread = true;
+        s_usingExtraThread = true;
 
         var thread = new Thread(() => {
             string solution;
@@ -79,7 +81,7 @@ public class ProceduralMazeModule : MonoBehaviour {
             yield return StartCoroutine(_mazeRenderer.FlashAnimation(AnimationData.GetRandomSingle(), new Color(1, 0.5f, 1), 0.5f));
             count++;
         }
-        _usingExtraThread = false;
+        s_usingExtraThread = false;
         // Thread finish
 
         _audio.PlaySoundAtTransform("MazeGeneration", transform);
@@ -250,12 +252,12 @@ public class ProceduralMazeModule : MonoBehaviour {
     }
 
     private IEnumerator TwitchHandleForcedSolve() {
-        while (_usingExtraThread || _isLoadingMaze) {
+        while (s_usingExtraThread || _isLoadingMaze) {
             yield return true;
         }
 
         // Thread start
-        _usingExtraThread = true;
+        s_usingExtraThread = true;
         _mazeHandler.Solution = "breh";
 
         var thread = new Thread(() => {
@@ -268,7 +270,7 @@ public class ProceduralMazeModule : MonoBehaviour {
         while (_mazeHandler.Solution == "breh") {
             yield return true;
         }
-        _usingExtraThread = false;
+        s_usingExtraThread = false;
         // Thread finish
 
         if (_mazeHandler.Solution == string.Empty) {
